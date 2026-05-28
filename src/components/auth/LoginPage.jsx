@@ -108,7 +108,7 @@ const s = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: '#F0F2F5',
+    background: '#073170',
     fontFamily: "'Segoe UI', system-ui, sans-serif",
     padding: 20,
     position: 'relative',
