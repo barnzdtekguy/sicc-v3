@@ -281,7 +281,7 @@ const s = {
     zIndex: 1,
     width: '100%',
     maxWidth: 400,
-    background: 'rgba(255,255,255,0.06)',
+    background: 'rgba(255, 255, 255, 0.06)',
     backdropFilter: 'blur(24px)',
     WebkitBackdropFilter: 'blur(24px)',
     borderRadius: 20,
