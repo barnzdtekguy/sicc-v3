@@ -108,7 +108,7 @@ const s = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: '#022a67',
+    background: '#ffffff',
     fontFamily: "'Segoe UI', system-ui, sans-serif",
     padding: 20,
     position: 'relative',
@@ -146,7 +146,7 @@ const s = {
     height: 96,
     objectFit: 'contain',
     borderRadius: 16,
-    filter: 'drop-shadow(0 4px 16px rgba(201,168,76,0.2))',
+    filter: 'drop-shadow(0 4px 16px rgba(201, 168, 76, 0))',
   },
   churchName: {
     margin: '0 0 12px',
