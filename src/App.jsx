@@ -1,5 +1,5 @@
 // src/App.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import { ROLES } from './data/constants';
 import { C } from './components/shared/UI';
@@ -12,11 +12,48 @@ import PastorDashboard from './components/pastor/PastorDashboard';
 import DeptDashboard from './components/department/DeptDashboard';
 import KDFDashboard from './components/kdf/KDFDashboard';
 
-function AppContent() {
-  const { profile, isAuthenticated, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview');
-  const [showLogin, setShowLogin] = useState(false);
+// Pages in order
+const PAGES = { LANDING: 'landing', LOGIN: 'login', DASHBOARD: 'dashboard' };
 
+function AppContent() {
+  const { profile, isAuthenticated, loading, logout } = useAuth();
+  const [activeTab, setActiveTab] = useState('overview');
+  const [page, setPage] = useState(PAGES.LANDING);
+
+  // ── Push a browser history entry when navigating ──
+  const navigate = (newPage) => {
+    window.history.pushState({ page: newPage }, '', window.location.pathname);
+    setPage(newPage);
+  };
+
+  // ── Listen for the back/forward button ──
+  useEffect(() => {
+    // Set initial history entry so there's always something to go back "to"
+    window.history.replaceState({ page: PAGES.LANDING }, '', window.location.pathname);
+
+    const onPopState = (e) => {
+      const target = e.state?.page || PAGES.LANDING;
+      // Don't let back button bypass authentication
+      if (target === PAGES.DASHBOARD && !isAuthenticated) {
+        setPage(PAGES.LOGIN);
+      } else {
+        setPage(target);
+      }
+    };
+
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, [isAuthenticated]);
+
+  // ── When user logs in successfully, push dashboard into history ──
+  useEffect(() => {
+    if (isAuthenticated) {
+      window.history.pushState({ page: PAGES.DASHBOARD }, '', window.location.pathname);
+      setPage(PAGES.DASHBOARD);
+    }
+  }, [isAuthenticated]);
+
+  // ── Loading screen ──
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: C.pageBg, fontFamily: 'system-ui' }}>
@@ -29,13 +66,17 @@ function AppContent() {
     );
   }
 
-  // Show landing page first (unless user clicked "Sign In" or is already authenticated)
-  if (!isAuthenticated && !showLogin) {
-    return <LandingPage onEnter={() => setShowLogin(true)} />;
+  // ── Landing page ──
+  if (page === PAGES.LANDING) {
+    return <LandingPage onEnter={() => navigate(PAGES.LOGIN)} />;
   }
 
-  if (!isAuthenticated) return <LoginPage />;
+  // ── Login page ──
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
 
+  // ── Dashboard ──
   const renderDashboard = () => {
     switch (profile?.role) {
       case ROLES.BISHOP:            return <BishopDashboard activeTab={activeTab} />;
