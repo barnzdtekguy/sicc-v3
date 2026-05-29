@@ -78,12 +78,12 @@ export default function LandingPage({ onEnter }) {
   };
 
   return (
-    <div style={{ fontFamily: "'DM Sans', 'Segoe UI', sans-serif", background: C.offWhite, color: C.text, overflowX: 'hidden' }}>
+    <div style={{ fontFamily: "'Plus Jakarta Sans', 'Segoe UI', sans-serif", background: C.offWhite, color: C.text, overflowX: 'hidden' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
-        .serif { font-family: 'DM Serif Display', Georgia, serif; }
+        .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
         .gold-em { color: ${C.gold}; font-style: italic; }
         @keyframes floatA { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-10px)} }
         @keyframes floatB { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-14px)} }
@@ -137,7 +137,7 @@ export default function LandingPage({ onEnter }) {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <img src="/salem-logo.png" alt="SICC" style={{ width: 36, height: 36, objectFit: 'contain' }} />
+          <img src="/salem-logo.png" alt="SICC" style={{ width: 36, height: 36, objectFit: 'contain', mixBlendMode: 'screen' }} />
           <span className="serif" style={{ fontSize: 16, color: C.white, fontWeight: 400, letterSpacing: '0.01em' }}>SICC Admin</span>
         </div>
 
@@ -177,7 +177,7 @@ export default function LandingPage({ onEnter }) {
               <span style={{ fontSize: 12, color: C.goldLight, fontWeight: 500 }}>Internal Administrative Portal</span>
             </div>
 
-            <h1 className="serif" style={{ fontSize: 'clamp(2.4rem, 4.5vw, 3.6rem)', lineHeight: 1.12, color: C.white, fontWeight: 400, marginBottom: '1.25rem' }}>
+            <h1 className="serif" style={{ fontSize: 'clamp(2.8rem, 5.5vw, 4.2rem)', lineHeight: 1.08, color: C.white, fontWeight: 500, marginBottom: '1.25rem' }}>
               Salem International<br /><span className="gold-em">Christian Centre</span>
             </h1>
 
@@ -484,7 +484,7 @@ export default function LandingPage({ onEnter }) {
       <section style={{ background: `linear-gradient(135deg, ${C.navy} 0%, ${C.navyMid} 100%)`, padding: 'clamp(3.5rem, 7vw, 5rem) clamp(1.25rem, 5vw, 3rem)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 500, height: 500, borderRadius: '50%', background: `radial-gradient(circle, ${C.gold}12 0%, transparent 70%)`, pointerEvents: 'none' }} />
         <FadeIn>
-          <img src="/salem-logo.png" alt="SICC" style={{ width: 56, height: 56, objectFit: 'contain', marginBottom: '1.25rem', opacity: 0.85 }} />
+          <img src="/salem-logo.png" alt="SICC" style={{ width: 56, height: 56, objectFit: 'contain', marginBottom: '1.25rem', mixBlendMode: 'screen' }} />
           <h2 className="serif" style={{ fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)', color: C.white, fontWeight: 400, marginBottom: '.75rem' }}>
             Ready to get started?
           </h2>
@@ -500,7 +500,7 @@ export default function LandingPage({ onEnter }) {
       {/* ── FOOTER ── */}
       <footer style={{ background: C.navy, borderTop: '1px solid rgba(255,255,255,.07)', padding: '1.75rem clamp(1.25rem, 5vw, 3rem)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <img src="/salem-logo.png" alt="" style={{ width: 28, height: 28, objectFit: 'contain', opacity: 0.7 }} />
+          <img src="/salem-logo.png" alt="" style={{ width: 28, height: 28, objectFit: 'contain', mixBlendMode: 'screen' }} />
           <span className="serif" style={{ fontSize: 14, color: 'rgba(255,255,255,.5)', fontWeight: 400 }}>Salem International Christian Centre</span>
         </div>
         <span style={{ fontSize: 12, color: 'rgba(255,255,255,.3)' }}>SICC Admin Portal — For internal use only</span>
