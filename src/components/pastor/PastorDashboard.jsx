@@ -3,11 +3,12 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { StatCard, Panel, Badge, DataTable, Btn, Modal, Input, Select, Textarea, SearchInput, C, Alert, Grid, StatusBadge, FilterSelect, EmptyState } from '../shared/UI';
 import { getMembers, createMember, getFollowUps, createFollowUp, addLog } from '../../lib/db';
+import ProgrammeAttendance from './ProgrammeAttendance';
 import { DEPARTMENTS, KDF_AREAS, AFFINITY_GROUPS, MEMBER_STATUSES, SPIRITUAL_STATUSES, FOLLOWUP_METHODS, FOLLOWUP_STATUSES, matchKDFArea } from '../../data/constants';
 import { Users, Star, CheckSquare, Phone, ClipboardList, Activity, MapPin, Building2, UserPlus, TrendingUp } from 'lucide-react';
 
 export default function PastorDashboard({ activeTab }) {
-  const map = { overview: Overview, register: RegisterMember, myMembers: MyMembers, followup: FollowUp, reports: Reports };
+  const map = { overview: Overview, register: RegisterMember, myMembers: MyMembers, attendance: ProgrammeAttendance, followup: FollowUp, reports: Reports };
   const Comp = map[activeTab] || Overview;
   return <Comp />;
 }

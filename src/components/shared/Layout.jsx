@@ -59,6 +59,7 @@ const NAV = {
     { key: 'overview',  label: 'My Dashboard' },
     { key: 'register',  label: 'Register Member' },
     { key: 'myMembers', label: 'My Members' },
+    { key: 'attendance', label: 'Programme Attendance' },
     { key: 'followup',  label: 'Follow-Up' },
     { key: 'reports',   label: 'My Reports' },
   ],
