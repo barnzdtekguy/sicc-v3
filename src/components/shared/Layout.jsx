@@ -6,7 +6,7 @@ import { C } from './UI';
 import {
   LayoutDashboard, TrendingUp, UserCog, ClipboardList, MapPin,
   Building2, Phone, Radio, BarChart2, Pin, Users, CheckSquare,
-  Settings, PlusCircle, LogOut, ChevronLeft, ChevronRight, UserPlus,
+  Settings, PlusCircle, LogOut, ChevronLeft, ChevronRight, UserPlus, Star,
 } from 'lucide-react';
 
 const ICON = {
@@ -27,7 +27,7 @@ const ICON = {
   myMembers:     <ClipboardList size={16} />,
   followup:      <Phone size={16} />,
   deptMembers:   <Users size={16} />,
-  kdfMembers:    <MapPin size={16} />,
+  greatness:     <Star size={16} />,
 };
 
 const NAV = {
@@ -39,6 +39,7 @@ const NAV = {
     { key: 'kdf',           label: 'KDF Areas' },
     { key: 'departments',   label: 'Departments' },
     { key: 'followups',     label: 'Follow-Up Reports' },
+    { key: 'greatness',     label: '32 Days of Greatness' },
     { key: 'communication', label: 'Communication' },
     { key: 'reports',       label: 'Reports' },
     { key: 'assignments',   label: 'Assignments' },
@@ -52,19 +53,21 @@ const NAV = {
     { key: 'kdf',         label: 'KDF Management' },
     { key: 'attendance',  label: 'Attendance' },
     { key: 'followups',   label: 'Follow-Up Reports' },
+    { key: 'greatness',   label: '32 Days of Greatness' },
     { key: 'reports',     label: 'Reports' },
     { key: 'settings',    label: 'Settings' },
   ],
   [ROLES.PASTOR]: [
-    { key: 'overview',  label: 'My Dashboard' },
-    { key: 'register',  label: 'Register Member' },
-    { key: 'myMembers', label: 'My Members' },
-    { key: 'attendance', label: 'Programme Attendance' },
-    { key: 'followup',  label: 'Follow-Up' },
-    { key: 'reports',   label: 'My Reports' },
+    { key: 'overview',   label: 'My Dashboard' },
+    { key: 'register',   label: 'Register Member' },
+    { key: 'myMembers',  label: 'My Members' },
+    { key: 'followup',   label: 'Follow-Up' },
+    { key: 'greatness',  label: '32 Days of Greatness' },
+    { key: 'reports',    label: 'My Reports' },
   ],
   [ROLES.DEPARTMENT_LEADER]: [
     { key: 'overview',    label: 'My Dashboard' },
+    { key: 'register',    label: 'Register Member' },
     { key: 'deptMembers', label: 'Dept Members' },
     { key: 'attendance',  label: 'Attendance' },
     { key: 'reports',     label: 'Reports' },
