@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './hooks/useAuth';
 import { ROLES } from './data/constants';
 import { C } from './components/shared/UI';
 import LoginPage from './components/auth/LoginPage';
+import LandingPage from './components/LandingPage';
 import Layout from './components/shared/Layout';
 import BishopDashboard from './components/bishop/BishopDashboard';
 import AdminDashboard from './components/admin/AdminDashboard';
@@ -14,6 +15,7 @@ import KDFDashboard from './components/kdf/KDFDashboard';
 function AppContent() {
   const { profile, isAuthenticated, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
+  const [showLogin, setShowLogin] = useState(false);
 
   if (loading) {
     return (
@@ -25,6 +27,11 @@ function AppContent() {
         </div>
       </div>
     );
+  }
+
+  // Show landing page first (unless user clicked "Sign In" or is already authenticated)
+  if (!isAuthenticated && !showLogin) {
+    return <LandingPage onEnter={() => setShowLogin(true)} />;
   }
 
   if (!isAuthenticated) return <LoginPage />;
