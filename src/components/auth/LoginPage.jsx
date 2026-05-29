@@ -133,7 +133,7 @@ const s = {
     maxWidth: 400,
     background: 'rgba(255,255,255,0.08)',
     backdropFilter: 'blur(40px)',
-    WebkitBackdropFilter: 'blur(40px)',
+    WebkitBackdropFilter: 'blur(10px)',
     borderRadius: 24,
     padding: '36px 36px 28px',
     border: '1px solid rgba(255,255,255,0.15)',
