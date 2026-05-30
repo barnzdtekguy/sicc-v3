@@ -17,10 +17,10 @@ export const C = {
 
 export function StatCard({ label, value, sub, icon, color = C.blue, onClick }) {
   return (
-    <div onClick={onClick} style={{ background: C.cardBg, border: `0.5px solid ${C.border}`, borderRadius: 12, padding: '16px 18px', cursor: onClick ? 'pointer' : 'default', position: 'relative', overflow: 'hidden' }}>
+    <div className="sicc-stat-card" onClick={onClick} style={{ background: C.cardBg, border: `0.5px solid ${C.border}`, borderRadius: 12, padding: '16px 18px', cursor: onClick ? 'pointer' : 'default', position: 'relative', overflow: 'hidden', minWidth: 0 }}>
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: color, borderRadius: '12px 12px 0 0' }} />
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: 4 }}>
-        <div>
+        <div style={{ minWidth: 0 }}>
           <div style={{ fontSize: 11, color: C.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 500, marginBottom: 6 }}>{label}</div>
           <div style={{ fontSize: 28, fontWeight: 500, color: C.textPrimary, lineHeight: 1 }}>{value ?? '—'}</div>
           {sub && <div style={{ fontSize: 11, color, marginTop: 4, fontWeight: 500 }}>{sub}</div>}
@@ -33,7 +33,7 @@ export function StatCard({ label, value, sub, icon, color = C.blue, onClick }) {
 
 export function Panel({ children, title, action, style: s }) {
   return (
-    <div style={{ background: C.cardBg, border: `0.5px solid ${C.border}`, borderRadius: 12, padding: '18px 20px', ...s }}>
+    <div className="sicc-panel" style={{ background: C.cardBg, border: `0.5px solid ${C.border}`, borderRadius: 12, padding: '18px 20px', minWidth: 0, ...s }}>
       {title && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, paddingBottom: 12, borderBottom: `0.5px solid ${C.border}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -142,7 +142,7 @@ export function Modal({ title, onClose, children, width = 520 }) {
 
 export function DataTable({ columns, rows, emptyText = 'No records found', onRowClick }) {
   return (
-    <div style={{ overflowX: 'auto' }}>
+    <div className="sicc-table-wrap" style={{ overflowX: 'auto' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
         <thead>
           <tr style={{ background: C.pageBg }}>
@@ -222,7 +222,7 @@ export function FilterSelect({ value, onChange, options, placeholder = 'Filter..
 }
 
 export function Grid({ children, cols = 'repeat(auto-fit, minmax(200px, 1fr))', gap = 14 }) {
-  return <div style={{ display: 'grid', gridTemplateColumns: cols, gap }}>{children}</div>;
+  return <div className="sicc-grid" style={{ display: 'grid', gridTemplateColumns: cols, gap, minWidth: 0 }}>{children}</div>;
 }
 
 export function Alert({ type = 'info', message, onDismiss }) {

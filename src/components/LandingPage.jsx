@@ -121,9 +121,113 @@ export default function LandingPage({ onEnter }) {
         .role-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(12,27,58,.18); }
         .nav-link { font-size: 14px; color: rgba(255,255,255,.75); cursor: pointer; transition: color .2s; background:none; border:none; }
         .nav-link:hover { color: ${C.goldLight}; }
+        .mobile-nav-toggle { display: none; }
+        .mobile-nav-panel { display: none; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: ${C.cream}; }
         ::-webkit-scrollbar-thumb { background: ${C.gold}; border-radius: 3px; }
+
+        @media (max-width: 860px) {
+          .desk-nav,
+          .desktop-signin {
+            display: none !important;
+          }
+
+          .mobile-nav-toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,.18);
+            background: rgba(255,255,255,.08);
+            color: ${C.white};
+            cursor: pointer;
+          }
+
+          .mobile-nav-panel.open {
+            display: flex;
+            position: fixed;
+            top: 64px;
+            left: 12px;
+            right: 12px;
+            z-index: 210;
+            flex-direction: column;
+            gap: 6px;
+            padding: 12px;
+            background: rgba(12,27,58,.98);
+            border: 1px solid rgba(255,255,255,.10);
+            border-radius: 12px;
+            box-shadow: 0 18px 44px rgba(0,0,0,.28);
+          }
+
+          .mobile-nav-panel .nav-link {
+            width: 100%;
+            padding: 12px 10px;
+            text-align: left;
+            border-radius: 8px;
+          }
+
+          .mobile-nav-panel .nav-link:active,
+          .mobile-nav-panel .nav-link:hover {
+            background: rgba(201,168,76,.12);
+          }
+
+          .landing-hero-grid,
+          .landing-kdf-grid {
+            grid-template-columns: minmax(0, 1fr) !important;
+            gap: 2rem !important;
+          }
+
+          .landing-hero-copy {
+            padding-top: 12px;
+          }
+
+          .landing-actions > button {
+            flex: 1 1 145px;
+            justify-content: center;
+          }
+
+          .landing-hero-stats {
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px !important;
+            margin-top: 2rem !important;
+            padding-top: 1.25rem !important;
+          }
+
+          .landing-hero-visual {
+            height: 340px !important;
+            max-width: 430px;
+            width: 100%;
+            margin: 0 auto;
+          }
+        }
+
+        @media (max-width: 520px) {
+          .btn-gold,
+          .btn-outline {
+            min-height: 44px;
+            padding-inline: 18px;
+          }
+
+          .landing-hero-visual {
+            height: 310px !important;
+          }
+
+          .landing-hero-stats {
+            gap: 8px !important;
+          }
+
+          .landing-hero-stats > div {
+            min-width: 0;
+          }
+
+          .landing-hero-stats .serif {
+            font-size: 1.45rem !important;
+          }
+        }
       `}</style>
 
       {/* ── NAV ── */}
@@ -148,10 +252,23 @@ export default function LandingPage({ onEnter }) {
           ))}
         </div>
 
-        <button className="btn-gold" onClick={onEnter} style={{ padding: '9px 20px', fontSize: 13 }}>
+        <button className="btn-gold desktop-signin" onClick={onEnter} style={{ padding: '9px 20px', fontSize: 13 }}>
           Sign In <ArrowRight size={14} />
         </button>
+
+        <button className="mobile-nav-toggle" onClick={() => setMenuOpen(v => !v)} aria-label={menuOpen ? 'Close menu' : 'Open menu'}>
+          {menuOpen ? <X size={18} /> : <Menu size={18} />}
+        </button>
       </nav>
+
+      <div className={`mobile-nav-panel${menuOpen ? ' open' : ''}`}>
+        {[['features', 'Features'], ['modules', 'Modules'], ['roles', 'Who Uses It'], ['about', 'About']].map(([id, label]) => (
+          <button key={id} className="nav-link" onClick={() => scrollTo(id)}>{label}</button>
+        ))}
+        <button className="btn-gold" onClick={onEnter} style={{ justifyContent: 'center', marginTop: 4 }}>
+          Sign In <ArrowRight size={14} />
+        </button>
+      </div>
 
       {/* ── HERO ── */}
       <section style={{
@@ -164,10 +281,10 @@ export default function LandingPage({ onEnter }) {
         <div style={{ position: 'absolute', top: '-10%', right: '-5%', width: 480, height: 480, borderRadius: '50%', background: `radial-gradient(circle, ${C.gold}18 0%, transparent 70%)`, pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', bottom: '5%', left: '-8%', width: 360, height: 360, borderRadius: '50%', background: `radial-gradient(circle, #185FA520 0%, transparent 70%)`, pointerEvents: 'none' }} />
 
-        <div style={{ maxWidth: 1100, width: '100%', display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '4rem', alignItems: 'center' }}>
+        <div className="landing-hero-grid" style={{ maxWidth: 1100, width: '100%', display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '4rem', alignItems: 'center' }}>
 
           {/* left copy */}
-          <div>
+          <div className="landing-hero-copy">
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(201,168,76,.15)',
               border: '1px solid rgba(201,168,76,.3)', borderRadius: 99, padding: '5px 14px 5px 8px',
@@ -187,7 +304,7 @@ export default function LandingPage({ onEnter }) {
               A dedicated platform for managing church operations — from member records and KDF zones to departmental activities, events, and pastoral follow-ups. Built for SICC leadership.
             </p>
 
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+            <div className="landing-actions" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
               <button className="btn-gold" onClick={onEnter} style={{ fontSize: 15, padding: '13px 32px' }}>
                 Enter Portal <ArrowRight size={16} />
               </button>
@@ -197,7 +314,7 @@ export default function LandingPage({ onEnter }) {
             </div>
 
             {/* stats row */}
-            <div style={{ display: 'flex', gap: '2.5rem', marginTop: '2.5rem', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,.1)' }}>
+            <div className="landing-hero-stats" style={{ display: 'flex', gap: '2.5rem', marginTop: '2.5rem', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,.1)' }}>
               {[
                 { n: 41, suffix: '+', label: 'KDF Areas' },
                 { n: 14, suffix: '', label: 'Departments' },
@@ -214,7 +331,7 @@ export default function LandingPage({ onEnter }) {
           </div>
 
           {/* right — floating cards */}
-          <div style={{ position: 'relative', height: 460 }}>
+          <div className="landing-hero-visual" style={{ position: 'relative', height: 460 }}>
 
             {/* main dashboard card */}
             <div className="float-a" style={{
@@ -409,7 +526,7 @@ export default function LandingPage({ onEnter }) {
 
       {/* ── KDF HIGHLIGHT ── */}
       <section style={{ background: C.cream, borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}`, padding: 'clamp(4rem, 8vw, 5rem) clamp(1.25rem, 5vw, 3rem)' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '4rem', alignItems: 'center' }}>
+        <div className="landing-kdf-grid" style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '4rem', alignItems: 'center' }}>
           <FadeIn>
             <div style={{ fontSize: 12, color: C.gold, textTransform: 'uppercase', letterSpacing: '.1em', fontWeight: 600, marginBottom: '.75rem' }}>KDF — Kingdom Dominion Fellowship</div>
             <h2 className="serif" style={{ fontSize: 'clamp(1.7rem, 3vw, 2.3rem)', color: C.navy, fontWeight: 400, marginBottom: '1rem' }}>

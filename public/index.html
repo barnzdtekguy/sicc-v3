@@ -25,6 +25,45 @@
       @keyframes load { 0% { transform: translateX(-100%); } 100% { transform: translateX(400%); } }
       ::selection { background: rgba(24,95,165,0.15); }
       input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+      @media (max-width: 860px) {
+        body { overflow-x: hidden; }
+        button, input, select, textarea { max-width: 100%; }
+
+        .sicc-grid,
+        div[style*="grid-template-columns: 1fr 1fr"],
+        div[style*="grid-template-columns: 1fr 1fr 1fr"],
+        div[style*="grid-template-columns: repeat(auto-fill, minmax(300px"],
+        div[style*="grid-template-columns: repeat(auto-fill, minmax(270px"],
+        div[style*="grid-template-columns: repeat(auto-fill, minmax(250px"],
+        div[style*="grid-template-columns: repeat(auto-fit, minmax(280px"],
+        div[style*="grid-template-columns: repeat(auto-fit, minmax(260px"] {
+          grid-template-columns: minmax(0, 1fr) !important;
+          gap: 12px !important;
+        }
+
+        .sicc-panel {
+          padding: 14px !important;
+          border-radius: 10px !important;
+        }
+
+        .sicc-stat-card {
+          padding: 14px !important;
+          border-radius: 10px !important;
+        }
+
+        .sicc-table-wrap {
+          margin-inline: -2px;
+          padding-bottom: 4px;
+          -webkit-overflow-scrolling: touch;
+        }
+      }
+
+      @media (min-width: 641px) and (max-width: 860px) {
+        .sicc-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+      }
     </style>
   </head>
   <body>
