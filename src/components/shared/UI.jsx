@@ -3,7 +3,7 @@ import { AlertCircle, CheckCircle, Info, XCircle, X } from 'lucide-react';
 
 export const C = {
   gold: '#C9A84C', goldLight: '#E8C96A', goldDark: '#A07828',
-  navy: '#0C1B3A', navyLight: '#162847', blue: '#185FA5',
+  navy: '#0C1B3A', navyLight: '#162847', blue: '#042241',
   blueLight: '#E6F1FB', pageBg: '#F0F2F5', cardBg: '#FFFFFF',
   sidebarBg: '#0C1B3A', headerBg: '#FFFFFF', inputBg: '#F8F9FA',
   textPrimary: '#0D1B2A', textSecondary: '#546E7A', textMuted: '#90A4AE',

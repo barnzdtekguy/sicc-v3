@@ -1,7 +1,7 @@
 {
   "short_name": "SICC Admin",
   "name": "Salem International Christian Centre Admin",
-  "icons": [{"src": "salem-logo.png","sizes": "512x512","type": "image/png"}],
+  "icons": [{"src": "favicon.png","sizes": "512x512","type": "image/png"}],
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#0C1B3A",
