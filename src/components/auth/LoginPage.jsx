@@ -4,7 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { C, Spinner } from '../shared/UI';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
-export default function LoginPage() {
+export default function LoginPage({ onBack }) {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -47,6 +47,7 @@ export default function LoginPage() {
 
         {/* Form */}
         <form onSubmit={handleLogin} style={s.form}>
+          {error && <div style={s.errorPopup} role="alert">{error}</div>}
           <div style={s.fieldWrap}>
             <label style={s.label}>Email Address</label>
             <div style={s.inputRow}>
@@ -86,10 +87,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {error && (
-            <div style={s.errorBox} role="alert" aria-live="polite">{error}</div>
-          )}
-
           <button type="submit" style={s.submitBtn} disabled={loading}>
             {loading
               ? <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><Spinner size={16} color="#fff" /> Signing in...</span>
@@ -97,6 +94,12 @@ export default function LoginPage() {
             }
           </button>
         </form>
+
+        <div style={s.backLinkRow}>
+          <button type="button" onClick={onBack} style={s.backLink}>
+            ← Back to landing page
+          </button>
+        </div>
 
         <p style={s.helpText}>Authorized personnel only · Contact Admin for access issues</p>
 
@@ -142,15 +145,47 @@ const s = {
     backdropFilter: 'blur(40px)',
     WebkitBackdropFilter: 'blur(10px)',
     borderRadius: 24,
-    padding: '36px 36px 28px',
+    padding: '48px 36px 28px',
     border: '1px solid rgba(255,255,255,0.15)',
     boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15)',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
   },
+  errorPopup: {
+    position: 'absolute',
+    top: 18,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    width: 'calc(100% - 44px)',
+    maxWidth: 340,
+    background: '#FFEBEE',
+    border: '1px solid #F8C2C2',
+    borderRadius: 14,
+    padding: '12px 14px',
+    color: C.danger,
+    fontSize: 13,
+    textAlign: 'center',
+    boxShadow: '0 16px 40px rgba(198,0,0,0.08)',
+    zIndex: 2,
+  },
   logoWrap: {
     marginBottom: 16,
+  },
+  backLinkRow: {
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    marginTop: 6,
+  },
+  backLink: {
+    background: 'transparent',
+    border: 'none',
+    color: C.navy,
+    fontSize: 13,
+    cursor: 'pointer',
+    textDecoration: 'underline',
+    padding: '8px 0',
   },
   logo: {
     width: 96,
@@ -227,16 +262,6 @@ const s = {
     display: 'flex',
     alignItems: 'center',
     padding: 4,
-  },
-  errorBox: {
-    padding: '10px 14px',
-    background: '#FFEBEE',
-    border: '1px solid #FFCDD2',
-    borderRadius: 8,
-    color: C.danger,
-    fontSize: 13,
-    width: '100%',
-    boxSizing: 'border-box',
   },
   submitBtn: {
     padding: '13px',

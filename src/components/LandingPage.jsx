@@ -1,5 +1,5 @@
 // src/components/LandingPage.jsx
-import { useState, useEffect, useRef, useNa } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Users, CalendarDays, DollarSign, MapPin, Building2,
   MessageSquare, BarChart3, Shield, ChevronRight,
@@ -65,6 +65,7 @@ function FadeIn({ children, delay = 0, style = {} }) {
 export default function LandingPage({ onEnter }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isLeaving, setIsLeaving] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -77,8 +78,22 @@ export default function LandingPage({ onEnter }) {
     setMenuOpen(false);
   };
 
+  const handleEnter = () => {
+    setIsLeaving(true);
+    window.setTimeout(() => onEnter(), 240);
+  };
+
   return (
-    <div style={{ fontFamily: "'Plus Jakarta Sans', 'Segoe UI', sans-serif", background: C.offWhite, color: C.text, overflowX: 'hidden' }}>
+    <div style={{
+      fontFamily: "'Plus Jakarta Sans', 'Segoe UI', sans-serif",
+      background: C.offWhite,
+      color: C.text,
+      overflowX: 'hidden',
+      opacity: isLeaving ? 0 : 1,
+      transform: isLeaving ? 'translateY(-14px)' : 'translateY(0)',
+      transition: 'opacity 0.24s ease, transform 0.24s ease',
+      pointerEvents: isLeaving ? 'none' : 'auto',
+    }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -252,7 +267,7 @@ export default function LandingPage({ onEnter }) {
           ))}
         </div>
 
-        <button className="btn-gold desktop-signin" onClick={onEnter} style={{ padding: '9px 20px', fontSize: 13 }}>
+        <button className="btn-gold desktop-signin" onClick={handleEnter} style={{ padding: '9px 20px', fontSize: 13 }}>
           Sign In <ArrowRight size={14} />
         </button>
 
@@ -265,7 +280,7 @@ export default function LandingPage({ onEnter }) {
         {[['features', 'Features'], ['modules', 'Modules'], ['roles', 'Who Uses It'], ['about', 'About']].map(([id, label]) => (
           <button key={id} className="nav-link" onClick={() => scrollTo(id)}>{label}</button>
         ))}
-        <button className="btn-gold" onClick={onEnter} style={{ justifyContent: 'center', marginTop: 4 }}>
+        <button className="btn-gold" onClick={handleEnter} style={{ justifyContent: 'center', marginTop: 4 }}>
           Sign In <ArrowRight size={14} />
         </button>
       </div>
@@ -305,7 +320,7 @@ export default function LandingPage({ onEnter }) {
             </p>
 
             <div className="landing-actions" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-              <button className="btn-gold" onClick={onEnter} style={{ fontSize: 15, padding: '13px 32px' }}>
+              <button className="btn-gold" onClick={handleEnter} style={{ fontSize: 15, padding: '13px 32px' }}>
                 Enter Portal <ArrowRight size={16} />
               </button>
               <button className="btn-outline" onClick={() => scrollTo('features')}>

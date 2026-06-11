@@ -28,6 +28,14 @@ function AppContent() {
     setPage(newPage);
   };
 
+  const navigateBack = () => {
+    if (window.history.state?.page && window.history.length > 1) {
+      window.history.back();
+    } else {
+      navigate(PAGES.LANDING);
+    }
+  };
+
   // ── Listen for the back/forward button ──
   useEffect(() => {
     if (isPublicCheckIn) return;
@@ -81,7 +89,7 @@ function AppContent() {
 
   // ── Login page ──
   if (!isAuthenticated) {
-    return <LoginPage />;
+    return <LoginPage onBack={navigateBack} />;
   }
 
   // ── Dashboard ──
