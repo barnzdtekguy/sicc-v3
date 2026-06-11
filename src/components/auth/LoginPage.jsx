@@ -31,6 +31,12 @@ export default function LoginPage({ onBack }) {
 
   return (
     <div style={s.page}>
+      <style>{`
+        @keyframes slideDown {
+          from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+          to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+      `}</style>
       <div style={s.bgCircle1} />
       <div style={s.bgCircle2} />
 
@@ -45,9 +51,10 @@ export default function LoginPage({ onBack }) {
         <div style={s.goldBar} />
         <p style={s.portalTag}>Internal Administrative Portal</p>
 
+        {error && <div style={s.errorPopup} role="alert">{error}</div>}
+
         {/* Form */}
         <form onSubmit={handleLogin} style={s.form}>
-          {error && <div style={s.errorPopup} role="alert">{error}</div>}
           <div style={s.fieldWrap}>
             <label style={s.label}>Email Address</label>
             <div style={s.inputRow}>
@@ -154,20 +161,22 @@ const s = {
   },
   errorPopup: {
     position: 'absolute',
-    top: 18,
+    top: 12,
     left: '50%',
     transform: 'translateX(-50%)',
-    width: 'calc(100% - 44px)',
-    maxWidth: 340,
+    width: 'calc(100% - 72px)',
+    maxWidth: 320,
     background: '#FFEBEE',
     border: '1px solid #F8C2C2',
-    borderRadius: 14,
+    borderRadius: 12,
     padding: '12px 14px',
     color: C.danger,
     fontSize: 13,
+    fontWeight: 500,
     textAlign: 'center',
     boxShadow: '0 16px 40px rgba(198,0,0,0.08)',
     zIndex: 2,
+    animation: 'slideDown 0.3s ease-out',
   },
   logoWrap: {
     marginBottom: 16,
