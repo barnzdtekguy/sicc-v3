@@ -97,7 +97,7 @@ export default function LoginPage({ onBack }) {
 
         <div style={s.backLinkRow}>
           <button type="button" onClick={onBack} style={s.backLink}>
-            ← Back to landing page
+            ← Back
           </button>
         </div>
 
