@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { C, Spinner } from '../shared/UI';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, AlertCircle, X } from 'lucide-react';
 
 export default function LoginPage({ onBack }) {
   const { login } = useAuth();
@@ -36,7 +36,30 @@ export default function LoginPage({ onBack }) {
           from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
           to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
+        @keyframes popIn {
+          from { opacity: 0; transform: scale(0.9); }
+          to { opacity: 1; transform: scale(1); }
+        }
       `}</style>
+
+      {error && (
+        <div style={s.errorOverlay} role="alertdialog" aria-modal="true">
+          <div style={s.errorModal}>
+            <div style={s.errorHeader}>
+              <AlertCircle size={24} color="#fff" />
+              <h2 style={s.errorTitle}>Login Failed</h2>
+              <button type="button" onClick={() => setError('')} style={s.errorCloseBtn} aria-label="Close error">
+                <X size={20} />
+              </button>
+            </div>
+            <p style={s.errorMessage}>{error}</p>
+            <button type="button" onClick={() => setError('')} style={s.errorDismissBtn}>
+              Try Again
+            </button>
+          </div>
+        </div>
+      )}
+
       <div style={s.bgCircle1} />
       <div style={s.bgCircle2} />
 
@@ -50,8 +73,6 @@ export default function LoginPage({ onBack }) {
         <h1 style={s.churchName}>Salem International<br />Christian Centre</h1>
         <div style={s.goldBar} />
         <p style={s.portalTag}>Internal Administrative Portal</p>
-
-        {error && <div style={s.errorPopup} role="alert">{error}</div>}
 
         {/* Form */}
         <form onSubmit={handleLogin} style={s.form}>
@@ -159,24 +180,66 @@ const s = {
     flexDirection: 'column',
     alignItems: 'center',
   },
-  errorPopup: {
-    position: 'absolute',
-    top: 12,
-    left: '50%',
-    transform: 'translateX(-50%)',
-    width: 'calc(100% - 72px)',
-    maxWidth: 320,
-    background: '#FFEBEE',
-    border: '1px solid #F8C2C2',
-    borderRadius: 12,
-    padding: '12px 14px',
-    color: C.danger,
-    fontSize: 13,
-    fontWeight: 500,
-    textAlign: 'center',
-    boxShadow: '0 16px 40px rgba(198,0,0,0.08)',
-    zIndex: 2,
-    animation: 'slideDown 0.3s ease-out',
+  errorOverlay: {
+    position: 'fixed',
+    inset: 0,
+    background: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 9999,
+    backdropFilter: 'blur(4px)',
+  },
+  errorModal: {
+    position: 'relative',
+    background: '#EF5350',
+    borderRadius: 16,
+    padding: '24px 28px',
+    maxWidth: 360,
+    width: 'calc(100% - 32px)',
+    boxShadow: '0 20px 60px rgba(198, 40, 40, 0.3)',
+    animation: 'popIn 0.3s ease-out',
+  },
+  errorHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 14,
+  },
+  errorTitle: {
+    margin: 0,
+    fontSize: 18,
+    fontWeight: 600,
+    color: '#fff',
+    flex: 1,
+  },
+  errorCloseBtn: {
+    background: 'transparent',
+    border: 'none',
+    color: '#fff',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    padding: 4,
+    flexShrink: 0,
+  },
+  errorMessage: {
+    margin: '0 0 18px 0',
+    fontSize: 14,
+    color: '#fff',
+    lineHeight: 1.6,
+  },
+  errorDismissBtn: {
+    width: '100%',
+    padding: '12px 16px',
+    background: '#fff',
+    color: '#C62828',
+    border: 'none',
+    borderRadius: 8,
+    fontSize: 14,
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'opacity 0.2s',
   },
   logoWrap: {
     marginBottom: 16,
