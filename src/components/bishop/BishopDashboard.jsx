@@ -9,13 +9,13 @@ import { Users, Star, UserCheck, MapPin, Building2, CheckSquare, TrendingUp, Pho
 
 import GreatnessDashboard from '../pastor/GreatnessDashboard';
 
-export default function BishopDashboard({ activeTab }) {
+export default function BishopDashboard({ activeTab, setActiveTab }) {
   const map = { overview: Overview, growth: Growth, staff: StaffMonitor, members: Members, kdf: KDFView, departments: DeptView, followups: FollowUps, greatness: GreatnessDashboard, communication: Communication, reports: Reports, assignments: Assignments };
   const Comp = map[activeTab] || Overview;
-  return <Comp />;
+  return <Comp setActiveTab={setActiveTab} />;
 }
 
-function Overview() {
+function Overview({ setActiveTab }) {
   const { profile } = useAuth();
   const [members, setMembers] = useState([]);
   const [profiles, setProfiles] = useState([]);
@@ -45,11 +45,12 @@ function Overview() {
       </div>
 
       <Grid cols="repeat(auto-fit, minmax(160px, 1fr))">
-        <StatCard label="Total Members" value={members.length} icon={<Users size={18} />} color={C.gold} />
-        <StatCard label="New Converts" value={newConverts.length} icon={<Star size={18} />} color={C.blue} sub="Need follow-up" />
-        <StatCard label="Active Pastors" value={pastors.length} icon={<UserCheck size={18} />} color={C.success} />
-        <StatCard label="KDF Areas" value={KDF_AREAS.length} icon={<MapPin size={18} />} color={C.purple} />
-        <StatCard label="Departments" value={DEPARTMENTS.length} icon={<Building2 size={18} />} color={C.danger} />
+        <StatCard label="Total Members" value={members.length} icon={<Users size={18} />} color={C.gold} onClick={() => setActiveTab?.('members')} />
+        <StatCard label="New Converts" value={newConverts.length} icon={<Star size={18} />} color={C.blue} sub="Need follow-up" onClick={() => setActiveTab?.('members')} />
+        <StatCard label="Need follow-up" value={newConverts.length} icon={<Bell size={18} />} color={C.warning} onClick={() => setActiveTab?.('followups')} />
+        <StatCard label="Active Pastors" value={pastors.length} icon={<UserCheck size={18} />} color={C.success} onClick={() => setActiveTab?.('staff')} />
+        <StatCard label="KDF Areas" value={KDF_AREAS.length} icon={<MapPin size={18} />} color={C.purple} onClick={() => setActiveTab?.('kdf')} />
+        <StatCard label="Departments" value={DEPARTMENTS.length} icon={<Building2 size={18} />} color={C.danger} onClick={() => setActiveTab?.('departments')} />
         <StatCard label="Last Attendance" value={lastService?.count ?? '—'} icon={<CheckSquare size={18} />} color={C.gold} sub={lastService?.service} />
       </Grid>
 

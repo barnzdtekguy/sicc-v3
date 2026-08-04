@@ -95,7 +95,7 @@ function AppContent() {
   // ── Dashboard ──
   const renderDashboard = () => {
     switch (profile?.role) {
-      case ROLES.BISHOP:            return <BishopDashboard activeTab={activeTab} />;
+      case ROLES.BISHOP:            return <BishopDashboard activeTab={activeTab} setActiveTab={setActiveTab} />;
       case ROLES.ADMIN:             return <AdminDashboard activeTab={activeTab} />;
       case ROLES.PASTOR:            return <PastorDashboard activeTab={activeTab} />;
       case ROLES.DEPARTMENT_LEADER: return <DeptDashboard activeTab={activeTab} />;
