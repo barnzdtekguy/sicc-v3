@@ -114,7 +114,20 @@ export default function LoginPage({ onBack }) {
               </button>
             </div>
           </div>
+          {/* Error Message */}
+{error && (
+  <div style={s.errorBox}>
+    <AlertCircle size={14} color={C.danger} style={{ flexShrink: 0, marginTop: 1 }} />
+    <span>{error}</span>
+  </div>
+)}
 
+<button type="submit" style={s.submitBtn} disabled={loading}>
+  {loading
+    ? <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><Spinner size={16} color="#fff" /> Signing in...</span>
+    : 'Sign In to Dashboard'
+  }
+</button>
           <button type="submit" style={s.submitBtn} disabled={loading}>
             {loading
               ? <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><Spinner size={16} color="#fff" /> Signing in...</span>
