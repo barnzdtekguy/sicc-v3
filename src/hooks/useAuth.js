@@ -30,10 +30,13 @@ export function AuthProvider({ children }) {
   };
 
   const login = async (email, password) => {
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-    if (error) { setLoading(false); return { success: false, error: error.message }; }
-    return { success: true };
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      if (error) return { success: false, error: error.message };
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error?.message || 'Unable to sign in. Please try again.' };
+    }
   };
 
   const logout = async () => {

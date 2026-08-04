@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { C, Spinner } from '../shared/UI';
-import { Mail, Lock, Eye, EyeOff, AlertCircle, X } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 
 export default function LoginPage({ onBack }) {
   const { login } = useAuth();
@@ -12,54 +12,35 @@ export default function LoginPage({ onBack }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const getLoginError = (rawError) => {
+    const message = String(rawError || '').toLowerCase();
+
+    if (message.includes('invalid login credentials') || message.includes('invalid credentials')) {
+      return 'Incorrect email or password. Please check your credentials and try again.';
+    }
+
+    return rawError || 'Login failed. Please try again.';
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!email || !password) { setError('Please enter your email and password.'); return; }
     setError('');
     setLoading(true);
-    const result = await login(email.trim(), password);
-    if (!result.success) {
-      const message = String(result.error || '').toLowerCase();
-      setError(
-        message.includes('invalid login credentials') || message.includes('invalid credentials')
-          ? 'Incorrect email or password. Please check your credentials and try again.'
-          : result.error || 'Login failed. Please try again.'
-      );
+    try {
+      const result = await login(email.trim(), password);
+      if (!result.success) {
+        setError(getLoginError(result.error));
+      }
+    } catch (err) {
+      setError(getLoginError(err?.message));
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
     <div style={s.page}>
-      <style>{`
-        @keyframes slideDown {
-          from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-          to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-        @keyframes popIn {
-          from { opacity: 0; transform: scale(0.9); }
-          to { opacity: 1; transform: scale(1); }
-        }
-      `}</style>
-
-      {error && (
-        <div style={s.errorOverlay} role="alertdialog" aria-modal="true">
-          <div style={s.errorModal}>
-            <div style={s.errorHeader}>
-              <AlertCircle size={24} color="#fff" />
-              <h2 style={s.errorTitle}>Login Failed</h2>
-              <button type="button" onClick={() => setError('')} style={s.errorCloseBtn} aria-label="Close error">
-                <X size={20} />
-              </button>
-            </div>
-            <p style={s.errorMessage}>{error}</p>
-            <button type="button" onClick={() => setError('')} style={s.errorDismissBtn}>
-              Try Again
-            </button>
-          </div>
-        </div>
-      )}
-
       <div style={s.bgCircle1} />
       <div style={s.bgCircle2} />
 
@@ -114,20 +95,13 @@ export default function LoginPage({ onBack }) {
               </button>
             </div>
           </div>
-          {/* Error Message */}
-{error && (
-  <div style={s.errorBox}>
-    <AlertCircle size={14} color={C.danger} style={{ flexShrink: 0, marginTop: 1 }} />
-    <span>{error}</span>
-  </div>
-)}
+          {error && (
+            <div style={s.errorBox} role="alert">
+              <AlertCircle size={14} color={C.danger} style={{ flexShrink: 0, marginTop: 1 }} />
+              <span>{error}</span>
+            </div>
+          )}
 
-<button type="submit" style={s.submitBtn} disabled={loading}>
-  {loading
-    ? <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><Spinner size={16} color="#fff" /> Signing in...</span>
-    : 'Sign In to Dashboard'
-  }
-</button>
           <button type="submit" style={s.submitBtn} disabled={loading}>
             {loading
               ? <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><Spinner size={16} color="#fff" /> Signing in...</span>
@@ -138,11 +112,11 @@ export default function LoginPage({ onBack }) {
 
         <div style={s.backLinkRow}>
           <button type="button" onClick={onBack} style={s.backLink}>
-            ← Back
+            &lt; Back
           </button>
         </div>
 
-        <p style={s.helpText}>Authorized personnel only · Contact Admin for access issues</p>
+        <p style={s.helpText}>Authorized personnel only | Contact Admin for access issues</p>
 
         <div style={s.footer}>
           <span>Salem Int'l Christian Centre</span>
@@ -177,7 +151,7 @@ const s = {
     background: 'radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 70%)',
     pointerEvents: 'none',
   },
- card: {
+  card: {
     position: 'relative',
     zIndex: 1,
     width: '100%',
@@ -192,67 +166,6 @@ const s = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-  },
-  errorOverlay: {
-    position: 'fixed',
-    inset: 0,
-    background: 'rgba(0, 0, 0, 0.5)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 9999,
-    backdropFilter: 'blur(4px)',
-  },
-  errorModal: {
-    position: 'relative',
-    background: '#EF5350',
-    borderRadius: 16,
-    padding: '24px 28px',
-    maxWidth: 360,
-    width: 'calc(100% - 32px)',
-    boxShadow: '0 20px 60px rgba(198, 40, 40, 0.3)',
-    animation: 'popIn 0.3s ease-out',
-  },
-  errorHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 14,
-  },
-  errorTitle: {
-    margin: 0,
-    fontSize: 18,
-    fontWeight: 600,
-    color: '#fff',
-    flex: 1,
-  },
-  errorCloseBtn: {
-    background: 'transparent',
-    border: 'none',
-    color: '#fff',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    padding: 4,
-    flexShrink: 0,
-  },
-  errorMessage: {
-    margin: '0 0 18px 0',
-    fontSize: 14,
-    color: '#fff',
-    lineHeight: 1.6,
-  },
-  errorDismissBtn: {
-    width: '100%',
-    padding: '12px 16px',
-    background: '#fff',
-    color: '#C62828',
-    border: 'none',
-    borderRadius: 8,
-    fontSize: 14,
-    fontWeight: 600,
-    cursor: 'pointer',
-    transition: 'opacity 0.2s',
   },
   logoWrap: {
     marginBottom: 16,
@@ -347,6 +260,18 @@ const s = {
     display: 'flex',
     alignItems: 'center',
     padding: 4,
+  },
+  errorBox: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: 8,
+    padding: '10px 12px',
+    background: 'rgba(198, 40, 40, 0.08)',
+    border: `1px solid rgba(198, 40, 40, 0.22)`,
+    borderRadius: 9,
+    color: C.danger,
+    fontSize: 12,
+    lineHeight: 1.45,
   },
   submitBtn: {
     padding: '13px',
