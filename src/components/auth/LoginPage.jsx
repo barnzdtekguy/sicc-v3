@@ -2,7 +2,7 @@
 import { useMemo, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { C, Spinner, Modal } from '../shared/UI';
-import { Mail, Lock, Eye, EyeOff, AlertCircle, Shield, UserRound, ArrowRight, LockKeyhole, ChevronLeft, CircleUserRound } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, AlertCircle, UserRound, ArrowRight, Shield, MessageSquare } from 'lucide-react';
 
 const tabs = [
   { key: 'email', label: 'Email', placeholder: 'Enter your email address' },
@@ -85,6 +85,24 @@ export default function LoginPage({ onBack }) {
     setStep(1);
   };
 
+  const handlePasswordResetRequest = () => {
+    const trimmedIdentifier = identifier.trim();
+
+    if (!trimmedIdentifier) {
+      setError('Enter your email or username before requesting a password reset.');
+      return;
+    }
+
+    const subject = encodeURIComponent('Password Reset Notification');
+    const body = encodeURIComponent(
+      `A user has requested a password reset for the SICC Admin portal.\n\nIdentifier: ${trimmedIdentifier}\nRequested via: ${identifierType === 'email' ? 'Email' : 'Username'}\n\nPlease assist with account recovery.`
+    );
+
+    window.location.href = `mailto:admin@sicc.org?subject=${subject}&body=${body}`;
+    setRequestMessage('The admin team has been notified about your password reset request.');
+    setError('');
+  };
+
   const handleRequestAccess = (e) => {
     e.preventDefault();
     if (!requestForm.name.trim() || !requestForm.email.trim() || !requestForm.reason.trim()) {
@@ -160,9 +178,9 @@ export default function LoginPage({ onBack }) {
               </button>
 
               <div style={s.secondaryLinks}>
-                <button type="button" style={s.textAction}><Shield size={14} /> Lost your device?</button>
+                <button type="button" onClick={handlePasswordResetRequest} style={s.textAction}><Shield size={14} /> Forget Password?</button>
                 <span style={s.linkDivider} />
-                <button type="button" style={s.textAction}><LockKeyhole size={14} /> Lock your Account</button>
+                <button type="button" onClick={() => setShowRequestModal(true)} style={s.textAction}><MessageSquare size={14} /> Contact Admin</button>
               </div>
             </form>
           ) : (
@@ -196,7 +214,7 @@ export default function LoginPage({ onBack }) {
                     <input type="checkbox" checked={rememberMe} onChange={() => setRememberMe(!rememberMe)} />
                     <span>Remember me</span>
                   </label>
-                  <button type="button" style={s.forgotLink}>Forgot Password?</button>
+                  <button type="button" onClick={handlePasswordResetRequest} style={s.forgotLink}>Forgot Password?</button>
                 </div>
                 {error && <div style={s.inlineError}><AlertCircle size={14} />{error}</div>}
               </div>
