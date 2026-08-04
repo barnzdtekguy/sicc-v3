@@ -21,12 +21,17 @@ function Overview({ setActiveTab }) {
   const [profiles, setProfiles] = useState([]);
   const [attendance, setAttendance] = useState([]);
   const [logs, setLogs] = useState([]);
+  const [preview, setPreview] = useState(null);
   useEffect(() => { Promise.all([getMembers(), getProfiles(), getAttendance(), getLogs(10)]).then(([m, p, a, l]) => { setMembers(m); setProfiles(p); setAttendance(a); setLogs(l); }); }, []);
 
   const pastors = profiles.filter(p => p.role === ROLES.PASTOR);
   const newConverts = members.filter(m => m.status === 'New Convert');
   const todayBirthdays = getTodaysBirthdays(members);
   const lastService = attendance[0];
+
+  const openPreview = (tab, title, details, description) => {
+    setPreview({ tab, title, details, description });
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -45,12 +50,36 @@ function Overview({ setActiveTab }) {
       </div>
 
       <Grid cols="repeat(auto-fit, minmax(160px, 1fr))">
-        <StatCard label="Total Members" value={members.length} icon={<Users size={18} />} color={C.gold} onClick={() => setActiveTab?.('members')} />
-        <StatCard label="New Converts" value={newConverts.length} icon={<Star size={18} />} color={C.blue} sub="Need follow-up" onClick={() => setActiveTab?.('members')} />
-        <StatCard label="Need follow-up" value={newConverts.length} icon={<Bell size={18} />} color={C.warning} onClick={() => setActiveTab?.('followups')} />
-        <StatCard label="Active Pastors" value={pastors.length} icon={<UserCheck size={18} />} color={C.success} onClick={() => setActiveTab?.('staff')} />
-        <StatCard label="KDF Areas" value={KDF_AREAS.length} icon={<MapPin size={18} />} color={C.purple} onClick={() => setActiveTab?.('kdf')} />
-        <StatCard label="Departments" value={DEPARTMENTS.length} icon={<Building2 size={18} />} color={C.danger} onClick={() => setActiveTab?.('departments')} />
+        <StatCard label="Total Members" value={members.length} icon={<Users size={18} />} color={C.gold} onClick={() => openPreview('members', 'Members Overview', [
+          { label: 'Total Registered', value: members.length },
+          { label: 'New Converts', value: newConverts.length },
+          { label: 'Active Pastors', value: pastors.length },
+        ], 'See the full membership list and recent register status in one place.')} />
+        <StatCard label="New Converts" value={newConverts.length} icon={<Star size={18} />} color={C.blue} sub="Need follow-up" onClick={() => openPreview('members', 'New Converts', [
+          { label: 'New Converts', value: newConverts.length },
+          { label: 'Need Follow-Up', value: newConverts.length },
+          { label: 'Last Service', value: lastService?.service || '—' },
+        ], 'These are newly registered members needing pastoral follow-up support.')} />
+        <StatCard label="Need follow-up" value={newConverts.length} icon={<Bell size={18} />} color={C.warning} onClick={() => openPreview('followups', 'Follow-Up Queue', [
+          { label: 'Pending Follow-Ups', value: newConverts.length },
+          { label: 'Assigned Pastors', value: pastors.length },
+          { label: 'Services Recorded', value: attendance.length },
+        ], 'Review the current follow-up queue and assign pastoral support where needed.')} />
+        <StatCard label="Active Pastors" value={pastors.length} icon={<UserCheck size={18} />} color={C.success} onClick={() => openPreview('staff', 'Pastor Monitoring', [
+          { label: 'Active Pastors', value: pastors.length },
+          { label: 'Total Staff', value: profiles.length },
+          { label: 'Last Activity', value: logs[0]?.action || 'No activity yet' },
+        ], 'Track pastor activity, assigned members, and follow-up accountability.')} />
+        <StatCard label="KDF Areas" value={KDF_AREAS.length} icon={<MapPin size={18} />} color={C.purple} onClick={() => openPreview('kdf', 'KDF Areas Overview', [
+          { label: 'KDF Areas', value: KDF_AREAS.length },
+          { label: 'Members in Areas', value: members.length },
+          { label: 'Coordinators', value: KDF_AREAS.filter(k => k.coordinator).length },
+        ], 'Review coverage by KDF area and drill into the members assigned to each one.')} />
+        <StatCard label="Departments" value={DEPARTMENTS.length} icon={<Building2 size={18} />} color={C.danger} onClick={() => openPreview('departments', 'Departments Overview', [
+          { label: 'Departments', value: DEPARTMENTS.length },
+          { label: 'Leaders Assigned', value: profiles.filter(p => p.role === ROLES.DEPARTMENT_LEADER).length },
+          { label: 'Members Counted', value: members.length },
+        ], 'Inspect departmental leadership coverage and team sizing.')} />
         <StatCard label="Last Attendance" value={lastService?.count ?? '—'} icon={<CheckSquare size={18} />} color={C.gold} sub={lastService?.service} />
       </Grid>
 
@@ -87,6 +116,25 @@ function Overview({ setActiveTab }) {
             rows={todayBirthdays}
           />
         </Panel>
+      )}
+
+      {preview && (
+        <Modal title={preview.title} onClose={() => setPreview(null)} width={460}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ color: C.textSecondary, fontSize: 13, lineHeight: 1.6 }}>{preview.description}</div>
+            {preview.details.map((item) => (
+              <div key={item.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 10px', background: C.pageBg, borderRadius: 8, border: `1px solid ${C.border}` }}>
+                <span style={{ fontSize: 12, color: C.textMuted }}>{item.label}</span>
+                <strong style={{ fontSize: 14, color: C.navy }}>{item.value}</strong>
+              </div>
+            ))}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 4 }}>
+              <Btn color={C.navy} onClick={() => { setPreview(null); setActiveTab?.(preview.tab); }}>
+                View Section
+              </Btn>
+            </div>
+          </div>
+        </Modal>
       )}
     </div>
   );

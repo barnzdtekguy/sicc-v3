@@ -9,30 +9,59 @@ import { Users, UserCheck, MapPin, Building2, CheckSquare, TrendingUp, Phone, Cl
 
 import GreatnessDashboard from '../pastor/GreatnessDashboard';
 
-export default function AdminDashboard({ activeTab }) {
+export default function AdminDashboard({ activeTab, setActiveTab }) {
   const map = { overview: Overview, users: UserManagement, staff: StaffManagement, members: AllMembers, departments: DeptMgmt, kdf: KDFMgmt, attendance: Attendance, followups: FollowUps, greatness: GreatnessDashboard, reports: Reports, settings: Settings_ };
   const Comp = map[activeTab] || Overview;
-  return <Comp />;
+  return <Comp setActiveTab={setActiveTab} />;
 }
 
-function Overview() {
+function Overview({ setActiveTab }) {
   const [members, setMembers] = useState([]);
   const [profiles, setProfiles] = useState([]);
   const [logs, setLogs] = useState([]);
+  const [preview, setPreview] = useState(null);
   useEffect(() => { Promise.all([getMembers(), getProfiles(), getLogs(10)]).then(([m, p, l]) => { setMembers(m); setProfiles(p); setLogs(l); }); }, []);
   const pastors = profiles.filter(p => p.role === ROLES.PASTOR);
   const deptLeaders = profiles.filter(p => p.role === ROLES.DEPARTMENT_LEADER);
   const kdfCoords = profiles.filter(p => p.role === ROLES.KDF_COORDINATOR);
 
+  const openPreview = (tab, title, details, description) => {
+    setPreview({ tab, title, details, description });
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <Grid cols="repeat(auto-fit, minmax(150px, 1fr))">
-        <StatCard label="Total Members" value={members.length} icon={<Users size={18} />} color={C.gold} />
-        <StatCard label="Pastors" value={pastors.length} icon={<UserCheck size={18} />} color={C.success} />
-        <StatCard label="Dept Leaders" value={deptLeaders.length} icon={<Building2 size={18} />} color={C.purple} />
-        <StatCard label="KDF Coords" value={kdfCoords.length} icon={<MapPin size={18} />} color={C.danger} />
-        <StatCard label="Departments" value={DEPARTMENTS.length} icon={<ClipboardList size={18} />} color={C.gold} />
-        <StatCard label="KDF Areas" value={KDF_AREAS.length} icon={<Map size={18} />} color={C.blue} />
+        <StatCard label="Total Members" value={members.length} icon={<Users size={18} />} color={C.gold} onClick={() => openPreview('members', 'Members Snapshot', [
+          { label: 'Total Members', value: members.length },
+          { label: 'Pastors', value: pastors.length },
+          { label: 'Departments', value: DEPARTMENTS.length },
+        ], 'Review the full membership list and manage current member records from one place.')} />
+        <StatCard label="Pastors" value={pastors.length} icon={<UserCheck size={18} />} color={C.success} onClick={() => openPreview('staff', 'Pastor Staff Snapshot', [
+          { label: 'Pastors', value: pastors.length },
+          { label: 'Dept Leaders', value: deptLeaders.length },
+          { label: 'KDF Coords', value: kdfCoords.length },
+        ], 'Inspect the pastor roster and broader staff accountability structure.')} />
+        <StatCard label="Dept Leaders" value={deptLeaders.length} icon={<Building2 size={18} />} color={C.purple} onClick={() => openPreview('departments', 'Departments Snapshot', [
+          { label: 'Department Leaders', value: deptLeaders.length },
+          { label: 'Departments', value: DEPARTMENTS.length },
+          { label: 'Members', value: members.length },
+        ], 'Confirm department leadership coverage and departmental membership distribution.')} />
+        <StatCard label="KDF Coords" value={kdfCoords.length} icon={<MapPin size={18} />} color={C.danger} onClick={() => openPreview('kdf', 'KDF Management Snapshot', [
+          { label: 'KDF Coordinators', value: kdfCoords.length },
+          { label: 'KDF Areas', value: KDF_AREAS.length },
+          { label: 'Members', value: members.length },
+        ], 'Review KDF area coordination coverage and assign support where needed.')} />
+        <StatCard label="Departments" value={DEPARTMENTS.length} icon={<ClipboardList size={18} />} color={C.gold} onClick={() => openPreview('departments', 'Departments Snapshot', [
+          { label: 'Departments', value: DEPARTMENTS.length },
+          { label: 'Department Leaders', value: deptLeaders.length },
+          { label: 'Members', value: members.length },
+        ], 'Open the department overview to inspect leader assignments and structure.')} />
+        <StatCard label="KDF Areas" value={KDF_AREAS.length} icon={<Map size={18} />} color={C.blue} onClick={() => openPreview('kdf', 'KDF Areas Snapshot', [
+          { label: 'KDF Areas', value: KDF_AREAS.length },
+          { label: 'Coordinators', value: kdfCoords.length },
+          { label: 'Members', value: members.length },
+        ], 'Open the KDF management section for detailed area leadership and member distribution.')} />
       </Grid>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <Panel title="System Activity">
@@ -67,6 +96,25 @@ function Overview() {
           {[...pastors, ...deptLeaders, ...kdfCoords].length === 0 && <EmptyState icon={<Users size={28} color={C.textMuted} />} title="No staff yet" description="Create staff in User Management." />}
         </Panel>
       </div>
+
+      {preview && (
+        <Modal title={preview.title} onClose={() => setPreview(null)} width={460}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ color: C.textSecondary, fontSize: 13, lineHeight: 1.6 }}>{preview.description}</div>
+            {preview.details.map((item) => (
+              <div key={item.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 10px', background: C.pageBg, borderRadius: 8, border: `1px solid ${C.border}` }}>
+                <span style={{ fontSize: 12, color: C.textMuted }}>{item.label}</span>
+                <strong style={{ fontSize: 14, color: C.navy }}>{item.value}</strong>
+              </div>
+            ))}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 4 }}>
+              <Btn color={C.navy} onClick={() => { setPreview(null); setActiveTab?.(preview.tab); }}>
+                View Section
+              </Btn>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
