@@ -7,7 +7,7 @@ import { StatCard, Panel, Badge, DataTable, Btn, Modal, Input, Select, C, Alert,
 import { Users, CheckSquare, Calendar, BarChart2, UserPlus, X, QrCode, Copy, PlusCircle, Smartphone, ClipboardCheck } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, LineChart, Line } from 'recharts';
 
-const PROGRAMME = '32 Days of Greatness';
+const PROGRAMME = 'Leadership Training';
 const GREATNESS_PROGRAMME_ID = 'greatness-32-days';
 const TOTAL_DAYS = 32;
 const TODAY = new Date().toISOString().slice(0, 10);
@@ -301,7 +301,7 @@ export default function GreatnessDashboard() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div style={{ background: `linear-gradient(135deg, ${C.gold}20, ${C.gold}05)`, border: `1px solid ${C.gold}30`, borderRadius: 14, padding: '18px 22px' }}>
-        <div style={{ fontSize: 20, fontWeight: 700, color: C.gold, marginBottom: 4 }}>32 Days of Greatness</div>
+        <div style={{ fontSize: 20, fontWeight: 700, color: C.gold, marginBottom: 4 }}>Leadership Training</div>
         <div style={{ fontSize: 13, color: C.textSecondary }}>Programme attendance tracker with manual marking and QR self check-in.</div>
       </div>
 
@@ -756,7 +756,7 @@ function Charts() {
         <StatCard label="Best Day" value={bestDay?.day || '-'} icon={<BarChart2 size={18} />} color={C.purple} sub={bestDay ? `${bestDay.present} present` : ''} />
       </Grid>
 
-      <Panel title="Daily Attendance - 32 Days of Greatness">
+      <Panel title="Daily Attendance - Leadership Training">
         {allRecords.length === 0 ? (
           <EmptyState icon={<BarChart2 size={32} color={C.textMuted} />} title="No attendance data yet" description="Start marking attendance or let members scan the QR code." />
         ) : (
