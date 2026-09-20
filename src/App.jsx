@@ -11,7 +11,7 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import PastorDashboard from './components/pastor/PastorDashboard';
 import DeptDashboard from './components/department/DeptDashboard';
 import KDFDashboard from './components/kdf/KDFDashboard';
-import { PublicAttendanceCheckIn } from './components/pastor/GreatnessDashboard';
+import { PublicAttendanceCheckIn } from './components/pastor/LeadershipTraining';
 
 // Pages in order
 const PAGES = { LANDING: 'landing', LOGIN: 'login', DASHBOARD: 'dashboard' };

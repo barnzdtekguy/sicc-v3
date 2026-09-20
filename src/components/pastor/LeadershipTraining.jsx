@@ -1,4 +1,4 @@
-// src/components/pastor/GreatnessDashboard.jsx
+// src/components/pastor/LeadershipTraining.jsx
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
@@ -289,7 +289,7 @@ async function saveSelfCheckIn({ programme, date, day, person, markedBy = 'QR Se
   return saved;
 }
 
-export default function GreatnessDashboard() {
+export default function LeadershipTraining() {
   const [tab, setTab] = useState('mark');
   const tabs = [
     { key: 'mark', label: 'Mark Attendance', icon: <CheckSquare size={15} /> },

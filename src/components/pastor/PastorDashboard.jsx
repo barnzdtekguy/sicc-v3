@@ -5,10 +5,10 @@ import { StatCard, Panel, Badge, DataTable, Btn, Modal, Input, Select, Textarea,
 import { getMembers, createMember, getFollowUps, createFollowUp, addLog } from '../../lib/db';
 import { DEPARTMENTS, KDF_AREAS, AFFINITY_GROUPS, MEMBER_STATUSES, SPIRITUAL_STATUSES, FOLLOWUP_METHODS, FOLLOWUP_STATUSES, matchKDFArea } from '../../data/constants';
 import { Users, Star, CheckSquare, Phone, ClipboardList, Activity, MapPin, Building2, UserPlus, TrendingUp } from 'lucide-react';
-import GreatnessDashboard from './GreatnessDashboard';
+import LeadershipTraining from './LeadershipTraining';
 
 export default function PastorDashboard({ activeTab }) {
-  const map = { overview: Overview, register: RegisterMember, myMembers: MyMembers, followup: FollowUp, greatness: GreatnessDashboard, reports: Reports };
+  const map = { overview: Overview, register: RegisterMember, myMembers: MyMembers, followup: FollowUp, greatness: LeadershipTraining, reports: Reports };
   const Comp = map[activeTab] || Overview;
   return <Comp />;
 }

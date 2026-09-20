@@ -7,10 +7,10 @@ import { DEPARTMENTS, KDF_AREAS, ROLES, ROLE_COLORS, ROLE_LABELS, getTodaysBirth
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, CartesianGrid } from 'recharts';
 import { Users, Star, UserCheck, MapPin, Building2, CheckSquare, TrendingUp, Phone, ClipboardList, BarChart2, Calendar, MessageSquare, Activity, Briefcase, Bell, Clock, Heart, Send, Gift } from 'lucide-react';
 
-import GreatnessDashboard from '../pastor/GreatnessDashboard';
+import LeadershipTraining from '../pastor/LeadershipTraining';
 
 export default function BishopDashboard({ activeTab, setActiveTab }) {
-  const map = { overview: Overview, growth: Growth, staff: StaffMonitor, members: Members, kdf: KDFView, departments: DeptView, followups: FollowUps, greatness: GreatnessDashboard, communication: Communication, reports: Reports, assignments: Assignments };
+  const map = { overview: Overview, growth: Growth, staff: StaffMonitor, members: Members, kdf: KDFView, departments: DeptView, followups: FollowUps, greatness: LeadershipTraining, communication: Communication, reports: Reports, assignments: Assignments };
   const Comp = map[activeTab] || Overview;
   return <Comp setActiveTab={setActiveTab} />;
 }
