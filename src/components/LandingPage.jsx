@@ -158,8 +158,8 @@ export default function LandingPage({ onEnter }) {
 
           .mobile-nav-panel.open {
             display: flex;
-            position: fixed;
-            top: 64px;
+            position: absolute;
+            top: calc(100% + 1px);
             left: 12px;
             right: 12px;
             z-index: 210;
@@ -265,19 +265,24 @@ export default function LandingPage({ onEnter }) {
           Sign In <ArrowRight size={14} />
         </button>
 
-        <button className="mobile-nav-toggle" onClick={() => setMenuOpen(v => !v)} aria-label={menuOpen ? 'Close menu' : 'Open menu'}>
+        <button
+          className="mobile-nav-toggle"
+          onClick={() => setMenuOpen(v => !v)}
+          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={menuOpen}
+          aria-controls="landing-mobile-menu"
+        >
           {menuOpen ? <X size={18} /> : <Menu size={18} />}
         </button>
+        <div id="landing-mobile-menu" className={`mobile-nav-panel${menuOpen ? ' open' : ''}`}>
+          {[['features', 'Features'], ['modules', 'Modules'], ['roles', 'Who Uses It'], ['about', 'About']].map(([id, label]) => (
+            <button key={id} className="nav-link" onClick={() => scrollTo(id)}>{label}</button>
+          ))}
+          <button className="btn-gold" onClick={handleEnter} style={{ justifyContent: 'center', marginTop: 4 }}>
+            Sign In <ArrowRight size={14} />
+          </button>
+        </div>
       </nav>
-
-      <div className={`mobile-nav-panel${menuOpen ? ' open' : ''}`}>
-        {[['features', 'Features'], ['modules', 'Modules'], ['roles', 'Who Uses It'], ['about', 'About']].map(([id, label]) => (
-          <button key={id} className="nav-link" onClick={() => scrollTo(id)}>{label}</button>
-        ))}
-        <button className="btn-gold" onClick={handleEnter} style={{ justifyContent: 'center', marginTop: 4 }}>
-          Sign In <ArrowRight size={14} />
-        </button>
-      </div>
 
       {/* ── HERO ── */}
       <section style={{
