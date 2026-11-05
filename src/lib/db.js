@@ -122,10 +122,6 @@ export async function saveProgrammeRecord(record) {
   return mutationResult('/programme-attendance-records', { method: 'POST', body: record });
 }
 
-export async function findExistingPerson(person) {
-  return apiRequest('/public/attendance/match', { method: 'POST', body: person });
-}
-
 export async function savePublicCheckIn(record) {
   return mutationResult('/public/attendance/check-in', { method: 'POST', body: record });
 }

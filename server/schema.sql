@@ -166,11 +166,12 @@ CREATE TABLE IF NOT EXISTS sms_config (
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-INSERT IGNORE INTO attendance_programmes (id, name, programme_type, total_days, is_active) VALUES
-  ('greatness-32-days', 'Leadership Training', '32_days', 32, 1),
-  ('sunday-service', 'Sunday Service', 'service', NULL, 1),
-  ('mid-week-service', 'Mid-Week Service', 'service', NULL, 1),
-  ('prayer-night', 'Prayer Night', 'service', NULL, 1),
-  ('special-programme', 'Special Programme', 'service', NULL, 1),
-  ('conference', 'Conference', 'service', NULL, 1),
-  ('department-meeting', 'Department Meeting', 'service', NULL, 1);
+INSERT INTO attendance_programmes (id, name, programme_type, start_date, total_days, is_active) VALUES
+  ('greatness-32-days', 'Leadership Training', '32_days', CURRENT_DATE, 32, 1),
+  ('sunday-service', 'Sunday Service', 'service', NULL, NULL, 1),
+  ('mid-week-service', 'Mid-Week Service', 'service', NULL, NULL, 1),
+  ('prayer-night', 'Prayer Night', 'service', NULL, NULL, 1),
+  ('special-programme', 'Special Programme', 'service', NULL, NULL, 1),
+  ('conference', 'Conference', 'service', NULL, NULL, 1),
+  ('department-meeting', 'Department Meeting', 'service', NULL, NULL, 1)
+ON DUPLICATE KEY UPDATE start_date = COALESCE(attendance_programmes.start_date, VALUES(start_date));

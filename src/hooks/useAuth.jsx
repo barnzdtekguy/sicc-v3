@@ -1,4 +1,4 @@
-// src/hooks/useAuth.js
+// src/hooks/useAuth.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
 import { apiRequest } from '../lib/api';
 

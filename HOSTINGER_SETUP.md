@@ -8,7 +8,7 @@ SICC Admin runs as a Node.js/Express application and stores data in a Hostinger 
 2. Open that database in phpMyAdmin and import `server/schema.sql`.
 3. Keep the database host, name, user, and password private. They belong only in the Node.js application's environment variables.
 
-The schema creates an empty database with the application tables and default attendance programmes. It does not import Supabase data.
+The schema creates an empty database with the application tables and default attendance programmes. The Leadership Training programme starts on the date the schema is imported; update its `start_date` in `attendance_programmes` if the training starts on a different date. It does not import Supabase data.
 
 ## Configure the Node.js application
 

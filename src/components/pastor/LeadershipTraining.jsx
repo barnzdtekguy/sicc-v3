@@ -10,7 +10,6 @@ import {
   createProgramme as createProgrammeRecord,
   getProgrammeRecords as fetchProgrammeRecords,
   saveProgrammeRecord as persistProgrammeRecord,
-  findExistingPerson,
   savePublicCheckIn,
 } from '../../lib/db';
 import { DEPARTMENTS, SERVICE_TYPES } from '../../data/constants';
@@ -24,34 +23,6 @@ const TOTAL_DAYS = 32;
 const TODAY = new Date().toISOString().slice(0, 10);
 
 const DEPT_OPTIONS = DEPARTMENTS.map(department => department.name);
-const POSITION_OPTIONS = ['Pastor', 'Bishop', 'Invitee', 'Dept. Leader', 'Member', 'Covenant Friend', 'Other'];
-const SALEM_FAMILY_OPTIONS = [
-  'SALEM FAMILY, PENTECOST CITY',
-  'Salem Family, Ahoyaya District Headquarter',
-  'SALEM FAMILY, BADORE HEADQUARTER',
-  'SALEM FAMILY, VICTORIA ISLAND Headquarter',
-  'SALEM FAMILY, Jesutedo',
-  'Salem Family, Jesutedo Area Headquarter',
-  'Salem Family, Ajah Area Headquarter',
-  'SALEM FAMILY, EPE',
-  'SALEM FAMILY, MARYLAND',
-  'SALEM FAMILY, OWODE',
-  'SALEM FAMILY, ONOSA',
-  'SALEM FAMILY, GBAGADA HEADQUARTER',
-  'SALEM FAMILY, OWORONSHOKI',
-  'SALEM FAMILY, ILUPEJU',
-  'SALEM FAMILY, BARIGA',
-  'SALEM FAMILY, SHOMOLU',
-  'SALEM FAMILY, FESTAC HEADQUARTER',
-  'SALEM FAMILY, OJO',
-  'SALEM Family, Ahoyaya 2',
-  'SALEM FAMILY, OKUN AJAH',
-  'SALEM FAMILY, AJAH 2',
-  'Salem Family, Ketu Area Headquarter',
-  'SALEM FAMILY, IKORODU',
-  'OJODU AREA Headquarter',
-  'NOT A MEMBER',
-];
 const DEFAULT_PROGRAMMES = [
   { id: GREATNESS_PROGRAMME_ID, name: PROGRAMME, programme_type: '32_days', start_date: TODAY, end_date: '', total_days: TOTAL_DAYS, is_active: true },
   ...SERVICE_TYPES.map(service => ({ id: slugify(service), name: service, programme_type: 'service', start_date: '', end_date: '', total_days: null, is_active: true })),
@@ -688,8 +659,7 @@ export function PublicAttendanceCheckIn() {
   const [programme, setProgramme] = useState(DEFAULT_PROGRAMMES.find(p => p.id === programmeId) || DEFAULT_PROGRAMMES[0]);
   const [date, setDate] = useState(qrDate);
   const [lookup, setLookup] = useState({ name: '', phone: '' });
-  const [details, setDetails] = useState({ salem_family: '', date_of_birth: '', email: '', department: '', church_position: 'Member', other_position: '' });
-  const [match, setMatch] = useState(null);
+  const [details, setDetails] = useState({ date_of_birth: '' });
   const [checked, setChecked] = useState(false);
   const [stage, setStage] = useState('lookup');
   const [loading, setLoading] = useState(false);
@@ -702,33 +672,14 @@ export function PublicAttendanceCheckIn() {
     }).catch(error => setAlert({ type: 'danger', text: error.message }));
   }, [programmeId]);
 
-  const handleLookup = async e => {
+  const handleLookup = e => {
     e.preventDefault();
     if (!lookup.name.trim() || !lookup.phone.trim()) {
-      setAlert({ type: 'warning', text: 'Enter both your full name and phone number to look for an existing record.' });
+      setAlert({ type: 'warning', text: 'Enter your registered full name and phone number to continue.' });
       return;
     }
-    setLoading(true);
     setAlert(null);
-    try {
-      const found = await findExistingPerson(lookup);
-      setMatch(found);
-      if (found) {
-        setDetails({
-          salem_family: found.salem_family || '',
-          date_of_birth: found.date_of_birth || '',
-          email: found.email || '',
-          department: found.department || '',
-          church_position: found.church_position || 'Member',
-          other_position: '',
-        });
-      }
-      setStage(found ? 'confirm' : 'details');
-    } catch (error) {
-      setAlert({ type: 'danger', text: error.message });
-    } finally {
-      setLoading(false);
-    }
+    setStage('confirm');
   };
 
   const submit = async e => {
@@ -737,25 +688,19 @@ export function PublicAttendanceCheckIn() {
       setAlert({ type: 'warning', text: 'Tick the attendance confirmation box before submitting.' });
       return;
     }
-    const position = details.church_position === 'Other' ? details.other_position : details.church_position;
-    if (!details.salem_family || !details.date_of_birth) {
-      setAlert({ type: 'warning', text: 'Salem Family and Date of Birth are required.' });
+    if (!details.date_of_birth) {
+      setAlert({ type: 'warning', text: 'Date of Birth is required.' });
       return;
     }
-    if (!match && (!lookup.name || !lookup.phone || !details.department || !position)) {
-      setAlert({ type: 'warning', text: 'Name, phone, department and position are required.' });
+    if (!lookup.name.trim() || !lookup.phone.trim()) {
+      setAlert({ type: 'warning', text: 'Enter your full name and phone number.' });
       return;
     }
     setLoading(true);
     const person = {
-      ...(match || {}),
-      name: match?.name || lookup.name,
-      phone: match?.phone || lookup.phone,
-      department: details.department || match?.department || null,
-      church_position: position || match?.church_position || 'Member',
-      salem_family: details.salem_family,
+      name: lookup.name.trim(),
+      phone: lookup.phone,
       date_of_birth: details.date_of_birth,
-      email: details.email || null,
     };
     const result = await saveSelfCheckIn({ programme, date, day: qrDay, person });
     if (result.error) {
@@ -783,44 +728,18 @@ export function PublicAttendanceCheckIn() {
             <form onSubmit={handleLookup} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <Input label="Full Name" value={lookup.name} onChange={v => setLookup({ ...lookup, name: v })} placeholder="Enter your name" />
               <Input label="Phone Number" value={lookup.phone} onChange={v => setLookup({ ...lookup, phone: v })} placeholder="08XXXXXXXXX" />
-              <Btn type="submit" color={C.navy} size="lg" disabled={loading}><SearchIcon /> {loading ? 'Checking...' : 'Continue'}</Btn>
+              <Btn type="submit" color={C.navy} size="lg">Continue</Btn>
             </form>
           )}
 
-          {(stage === 'confirm' || stage === 'details') && (
+          {stage === 'confirm' && (
             <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {match ? (
-                <div style={{ background: C.successBg, border: `1px solid ${C.success}35`, borderRadius: 10, padding: 12 }}>
-                  <div style={{ fontSize: 12, color: C.success, fontWeight: 600, marginBottom: 4 }}>Record found</div>
-                  <div style={{ fontSize: 15, color: C.textPrimary, fontWeight: 600 }}>{match.name}</div>
-                  <div style={{ fontSize: 12, color: C.textSecondary }}>{match.phone || 'No phone'} {match.department ? `- ${match.department}` : ''}</div>
-                </div>
-              ) : (
-                <div style={{ background: C.infoBg, border: `1px solid ${C.info}25`, borderRadius: 10, padding: 12, fontSize: 13, color: C.textSecondary }}>
-                  We could not find an existing record, so please complete your details once.
-                </div>
-              )}
-
-              <Input label="Attendance Date" type="date" value={date} onChange={setDate} />
-              <Select
-                label="Salem Family *"
-                value={details.salem_family}
-                onChange={v => setDetails({ ...details, salem_family: v })}
-                options={SALEM_FAMILY_OPTIONS.map(family => ({ value: family, label: family }))}
-                required
-              />
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                <Input label="Date of Birth *" type="date" value={details.date_of_birth} onChange={v => setDetails({ ...details, date_of_birth: v })} required />
-                <Input label="Email Address" type="email" value={details.email} onChange={v => setDetails({ ...details, email: v })} placeholder="name@email.com" />
+              <div style={{ background: C.infoBg, border: `1px solid ${C.info}25`, borderRadius: 10, padding: 12, fontSize: 13, color: C.textSecondary }}>
+                Check-in is available to registered attendees. Enter your details as they appear in your church record.
               </div>
 
-              {!match && (
-                <>
-                  <Select label="Department *" value={details.department} onChange={v => setDetails({ ...details, department: v })} options={DEPT_OPTIONS.map(d => ({ value: d, label: d }))} required />
-                  <Select label="Position in Church *" value={details.church_position} onChange={v => setDetails({ ...details, church_position: v })} options={POSITION_OPTIONS.map(p => ({ value: p, label: p }))} required />
-                  {details.church_position === 'Other' && <Input label="Other Position *" value={details.other_position} onChange={v => setDetails({ ...details, other_position: v })} placeholder="Enter position" required />}
-                </>
-              )}
+              <Input label="Attendance Date" type="date" value={date} onChange={setDate} />
+              <Input label="Date of Birth *" type="date" value={details.date_of_birth} onChange={v => setDetails({ ...details, date_of_birth: v })} required />
 
               <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: 12, border: `1px solid ${C.border}`, borderRadius: 10, background: C.inputBg, cursor: 'pointer' }}>
                 <input type="checkbox" checked={checked} onChange={e => setChecked(e.target.checked)} style={{ marginTop: 2 }} />
@@ -829,7 +748,7 @@ export function PublicAttendanceCheckIn() {
 
               <div style={{ display: 'flex', gap: 10 }}>
                 <Btn type="submit" color={C.success} size="lg" disabled={loading}>{loading ? 'Submitting...' : 'Submit Attendance'}</Btn>
-                <Btn variant="outline" color={C.textSecondary} onClick={() => { setStage('lookup'); setMatch(null); setChecked(false); }}>Back</Btn>
+                <Btn variant="outline" color={C.textSecondary} onClick={() => { setStage('lookup'); setChecked(false); }}>Back</Btn>
               </div>
             </form>
           )}
@@ -870,10 +789,6 @@ function Progress({ value }) {
       <span style={{ fontSize: 12, color: C.textSecondary }}>{value}%</span>
     </div>
   );
-}
-
-function SearchIcon() {
-  return <Users size={16} />;
 }
 
 const dayBtn = {

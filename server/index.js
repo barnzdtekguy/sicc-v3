@@ -56,6 +56,76 @@ function safeDate(value) {
   return /^\d{4}-\d{2}-\d{2}$/.test(String(value || ''));
 }
 
+function validDate(value) {
+  if (!safeDate(value)) return false;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
+async function findPublicAttendancePerson(name, phoneDigits, dateOfBirth) {
+  const phoneSuffix = `%${phoneDigits.slice(-10)}`;
+  const [members, attendees, programmeRecords] = await Promise.all([
+    query(
+      `SELECT id, first_name, last_name, phone, department, status, date_of_birth
+       FROM members
+       WHERE phone LIKE ? AND LOWER(TRIM(CONCAT(first_name, ' ', last_name))) = LOWER(TRIM(?))
+       ORDER BY created_at DESC LIMIT 100`,
+      [phoneSuffix, name],
+    ),
+    query(
+      `SELECT id, name, phone, department, email
+       FROM greatness_attendees
+       WHERE phone LIKE ? AND LOWER(TRIM(name)) = LOWER(TRIM(?))
+       ORDER BY created_at DESC LIMIT 100`,
+      [phoneSuffix, name],
+    ),
+    query(
+      `SELECT id, attendee_name, phone, department, church_position, salem_family, date_of_birth, email
+       FROM programme_attendance_records
+       WHERE phone LIKE ? AND LOWER(TRIM(attendee_name)) = LOWER(TRIM(?))
+       ORDER BY created_at DESC LIMIT 100`,
+      [phoneSuffix, name],
+    ),
+  ]);
+  const candidates = [
+    ...members.map(member => ({
+      source: 'members',
+      id: member.id,
+      name: `${member.first_name} ${member.last_name}`.trim(),
+      phone: member.phone,
+      department: member.department,
+      church_position: member.status === 'Worker' ? 'Member' : member.status || 'Member',
+      date_of_birth: member.date_of_birth,
+    })),
+    ...attendees.map(attendee => ({
+      source: 'greatness_attendees',
+      id: attendee.id,
+      name: attendee.name,
+      phone: attendee.phone,
+      department: attendee.department,
+      church_position: 'Member',
+      email: attendee.email,
+    })),
+    ...programmeRecords.map(record => ({
+      source: 'programme_attendance_records',
+      id: record.id,
+      name: record.attendee_name,
+      phone: record.phone,
+      department: record.department,
+      church_position: record.church_position,
+      salem_family: record.salem_family,
+      date_of_birth: record.date_of_birth,
+      email: record.email,
+    })),
+  ];
+  return candidates.find(person =>
+    normalizePhone(person.phone) === phoneDigits
+    && person.name.toLocaleLowerCase() === name.toLocaleLowerCase()
+    && person.date_of_birth
+    && String(person.date_of_birth).slice(0, 10) === dateOfBirth
+  ) || null;
+}
+
 async function createRow(table, values) {
   const record = { id: crypto.randomUUID(), ...values };
   const fields = Object.keys(record);
@@ -68,7 +138,7 @@ async function createRow(table, values) {
   return rows[0];
 }
 
-async function saveProgrammeRecord(connection, input) {
+async function saveProgrammeRecord(connection, input, { insertOnly = false } = {}) {
   const phone = normalizePhone(input.phone);
   const record = {
     programme_id: input.programme_id,
@@ -99,6 +169,9 @@ async function saveProgrammeRecord(connection, input) {
   const [existing] = await connection.execute(matchSql, matchValues);
 
   if (existing[0]) {
+    if (insertOnly) {
+      throw new HttpError(409, 'Attendance has already been recorded for this programme and date.');
+    }
     const fields = Object.keys(record);
     await connection.execute(
       `UPDATE programme_attendance_records SET ${fields.map(field => `${field} = ?`).join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
@@ -198,7 +271,7 @@ api.post('/members', requireAuthenticated, requireRoles(...STAFF_ROLES), asyncRo
   sendData(res, member, 201);
 }));
 
-api.get('/follow-ups', requireAuthenticated, asyncRoute(async (req, res) => {
+api.get('/follow-ups', requireAuthenticated, requireRoles(...PRIVILEGED_ROLES, 'pastor', 'kdf_coordinator'), asyncRoute(async (req, res) => {
   const where = [];
   const values = [];
   if (req.profile.role === 'pastor') {
@@ -396,124 +469,97 @@ api.post('/programme-attendance-records', requireAuthenticated, requireRoles(...
   sendData(res, record, 201);
 }));
 
-api.post('/public/attendance/match', asyncRoute(async (req, res) => {
-  const name = String(req.body?.name || '').trim();
-  const phoneDigits = normalizePhone(req.body?.phone);
-  if (name.length < 2 || phoneDigits.length < 7) {
-    throw new HttpError(400, 'Enter both your full name and a valid phone number.');
-  }
-
-  const phoneSuffix = `%${phoneDigits.slice(-10)}`;
-  const [members, attendees, programmeRecords] = await Promise.all([
-    query(
-      `SELECT id, first_name, last_name, phone, department, status, date_of_birth
-       FROM members WHERE phone LIKE ? ORDER BY created_at DESC LIMIT 100`,
-      [phoneSuffix],
-    ),
-    query(
-      'SELECT id, name, phone, department, email FROM greatness_attendees WHERE phone LIKE ? ORDER BY created_at DESC LIMIT 100',
-      [phoneSuffix],
-    ),
-    query(
-      `SELECT id, attendee_name, phone, department, church_position, salem_family, date_of_birth, email
-       FROM programme_attendance_records WHERE phone LIKE ? ORDER BY created_at DESC LIMIT 100`,
-      [phoneSuffix],
-    ),
-  ]);
-  const candidates = [
-    ...members.map(member => ({
-      source: 'members',
-      id: member.id,
-      name: `${member.first_name} ${member.last_name}`.trim(),
-      phone: member.phone,
-      department: member.department,
-      church_position: member.status === 'Worker' ? 'Member' : member.status || 'Member',
-      date_of_birth: member.date_of_birth,
-    })),
-    ...attendees.map(attendee => ({
-      source: 'greatness_attendees',
-      id: attendee.id,
-      name: attendee.name,
-      phone: attendee.phone,
-      department: attendee.department,
-      church_position: 'Member',
-      email: attendee.email,
-    })),
-    ...programmeRecords.map(record => ({
-      source: 'programme_attendance_records',
-      id: record.id,
-      name: record.attendee_name,
-      phone: record.phone,
-      department: record.department,
-      church_position: record.church_position,
-      salem_family: record.salem_family,
-      date_of_birth: record.date_of_birth,
-      email: record.email,
-    })),
-  ];
-  const found = candidates.find(person =>
-    normalizePhone(person.phone).endsWith(phoneDigits.slice(-10))
-    && person.name.toLocaleLowerCase() === name.toLocaleLowerCase()
-  );
-  sendData(res, found || null);
-}));
-
 api.post('/public/attendance/check-in', asyncRoute(async (req, res) => {
   const body = req.body || {};
-  requireValues(body, ['programme_id', 'attendance_date', 'attendee_name', 'phone', 'salem_family', 'date_of_birth']);
-  if (!safeDate(body.attendance_date) || !safeDate(body.date_of_birth)) {
+  requireValues(body, ['programme_id', 'attendance_date', 'attendee_name', 'phone', 'date_of_birth']);
+  if (!validDate(body.attendance_date) || !validDate(body.date_of_birth)) {
     throw new HttpError(400, 'Enter valid attendance and date-of-birth dates.');
   }
-  if (normalizePhone(body.phone).length < 7) throw new HttpError(400, 'Enter a valid phone number.');
+  const today = new Date().toISOString().slice(0, 10);
+  if (body.attendance_date !== today) {
+    throw new HttpError(400, 'Public check-in is only available for the current date.');
+  }
+  const phoneNormalized = normalizePhone(body.phone);
+  if (phoneNormalized.length < 11) throw new HttpError(400, 'Enter a valid phone number.');
+
+  const attendee = await findPublicAttendancePerson(String(body.attendee_name).trim(), phoneNormalized, body.date_of_birth);
+  if (!attendee) {
+    throw new HttpError(403, 'We could not verify your details. Ask church staff to confirm your name, phone number, and date of birth are recorded correctly.');
+  }
 
   const programmes = await query('SELECT * FROM attendance_programmes WHERE id = ? AND is_active = 1 LIMIT 1', [body.programme_id]);
   const programme = programmes[0];
   if (!programme) throw new HttpError(404, 'This attendance programme is not available.');
+  if ((programme.start_date && today < programme.start_date) || (programme.end_date && today > programme.end_date)) {
+    throw new HttpError(400, 'This attendance programme is not scheduled for today.');
+  }
 
-  let dayNumber = body.day_number ? Number(body.day_number) : null;
-  if (programme.programme_type === '32_days' && programme.start_date) {
-    const start = new Date(`${programme.start_date}T00:00:00Z`);
-    const checkInDate = new Date(`${body.attendance_date}T00:00:00Z`);
+  let dayNumber = null;
+  if (programme.programme_type === '32_days') {
+    if (!programme.start_date) {
+      throw new HttpError(400, 'The 32-day programme start date has not been configured.');
+    }
+    const start = new Date(`${String(programme.start_date).slice(0, 10)}T00:00:00Z`);
+    const checkInDate = new Date(`${today}T00:00:00Z`);
     dayNumber = Math.floor((checkInDate - start) / 86400000) + 1;
-  }
-  if (programme.programme_type === '32_days' && (!Number.isInteger(dayNumber) || dayNumber < 1 || dayNumber > 32)) {
-    throw new HttpError(400, 'This check-in date is outside the 32-day programme.');
+    if (!Number.isInteger(dayNumber) || dayNumber < 1 || dayNumber > 32) {
+      throw new HttpError(400, 'This check-in date is outside the 32-day programme.');
+    }
   }
 
-  const phoneNormalized = normalizePhone(body.phone);
   const result = await transaction(async connection => {
+    await connection.execute('SELECT id FROM attendance_programmes WHERE id = ? FOR UPDATE', [programme.id]);
+    const [existingRecords] = await connection.execute(
+      `SELECT id FROM programme_attendance_records
+       WHERE programme_id = ? AND attendance_date = ?
+         AND (phone_normalized = ? OR LOWER(TRIM(attendee_name)) = LOWER(TRIM(?)))
+       LIMIT 1 FOR UPDATE`,
+      [programme.id, today, normalizePhone(attendee.phone), attendee.name],
+    );
+    if (existingRecords.length) {
+      throw new HttpError(409, 'Attendance has already been recorded for this programme and date.');
+    }
+
     const saved = await saveProgrammeRecord(connection, {
-      ...pick(body, ['programme_id', 'attendance_date', 'attendee_name', 'phone', 'salem_family', 'date_of_birth', 'email', 'department', 'church_position']),
+      programme_id: programme.id,
+      attendance_date: today,
+      attendee_name: attendee.name,
       programme_name: programme.name,
       programme_type: programme.programme_type,
       day_number: dayNumber,
-      phone_normalized: phoneNormalized,
-      attendee_source: 'self_checkin',
-      attendee_source_id: null,
+      phone: attendee.phone,
+      phone_normalized: normalizePhone(attendee.phone),
+      department: attendee.department || null,
+      church_position: attendee.church_position || 'Member',
+      salem_family: attendee.salem_family || null,
+      date_of_birth: attendee.date_of_birth,
+      email: attendee.email || null,
+      attendee_source: attendee.source,
+      attendee_source_id: attendee.id,
       status: 'Present',
       marked_by: 'QR Self Check-in',
       marked_at: new Date(),
-    });
+    }, { insertOnly: true });
 
     if (programme.programme_type === '32_days' && dayNumber) {
+      const matchedPhone = normalizePhone(attendee.phone);
       let attendeeRows = await connection.execute(
         'SELECT id FROM greatness_attendees WHERE phone_normalized = ? LIMIT 1 FOR UPDATE',
-        [phoneNormalized],
+        [matchedPhone],
       );
-      let attendee = attendeeRows[0][0];
-      if (!attendee) {
+      let greatnessAttendee = attendeeRows[0][0];
+      if (!greatnessAttendee) {
         const attendeeId = crypto.randomUUID();
         await connection.execute(
           'INSERT INTO greatness_attendees (id, name, phone, phone_normalized, email, department) VALUES (?, ?, ?, ?, ?, ?)',
-          [attendeeId, body.attendee_name, body.phone, phoneNormalized, body.email || null, body.department || null],
+          [attendeeId, attendee.name, attendee.phone, matchedPhone, attendee.email || null, attendee.department || null],
         );
-        attendee = { id: attendeeId };
+        greatnessAttendee = { id: attendeeId };
       }
       await connection.execute(
         `INSERT INTO greatness_attendance (id, attendee_id, day_number, status, marked_by, marked_at)
-         VALUES (?, ?, ?, 'Present', 'QR Self Check-in', CURRENT_TIMESTAMP)
-         ON DUPLICATE KEY UPDATE status = 'Present', marked_by = 'QR Self Check-in', marked_at = CURRENT_TIMESTAMP`,
-        [crypto.randomUUID(), attendee.id, dayNumber],
+         VALUES (?, ?, ?, 'Present', 'QR Self Check-in', CURRENT_TIMESTAMP)`,
+        [crypto.randomUUID(), greatnessAttendee.id, dayNumber],
       );
     }
     return saved;
