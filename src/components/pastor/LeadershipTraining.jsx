@@ -1,7 +1,18 @@
 // src/components/pastor/LeadershipTraining.jsx
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { supabase } from '../../lib/supabase';
+import {
+  getGreatnessAttendees,
+  getGreatnessAttendance,
+  createGreatnessAttendee,
+  saveGreatnessAttendance,
+  getProgrammes as fetchProgrammes,
+  createProgramme as createProgrammeRecord,
+  getProgrammeRecords as fetchProgrammeRecords,
+  saveProgrammeRecord as persistProgrammeRecord,
+  findExistingPerson,
+  savePublicCheckIn,
+} from '../../lib/db';
 import { DEPARTMENTS, SERVICE_TYPES } from '../../data/constants';
 import { StatCard, Panel, Badge, DataTable, Btn, Modal, Input, Select, C, Alert, Grid, SearchInput, EmptyState } from '../shared/UI';
 import { Users, CheckSquare, Calendar, BarChart2, UserPlus, X, QrCode, Copy, PlusCircle, Smartphone, ClipboardCheck } from 'lucide-react';
@@ -12,34 +23,7 @@ const GREATNESS_PROGRAMME_ID = 'greatness-32-days';
 const TOTAL_DAYS = 32;
 const TODAY = new Date().toISOString().slice(0, 10);
 
-const EXTRA_DEPARTMENT_OPTIONS = [
-  'Dedication',
-  'Missions',
-  'Transport',
-  'Facility Management/Projects',
-  'Security',
-  'Welfare',
-  'Finance',
-  'Medical',
-  'Education/Scholarship',
-  'Baptism Ministry',
-  'Legal Council',
-  'Bookshop/Reading Culture',
-  'Healing & Deliverance Crack Team',
-  'Counselling/Call Centre',
-  'Marriage/Couples',
-  'Singles Connect',
-  'Visitation',
-  'Publicity/Branding',
-  "Salem Elder's Ministry",
-  'Communion',
-  'Children',
-  'Announcement',
-  'Salem Theatre',
-  'Conflict Resolution Team',
-  '(NONE)',
-];
-const DEPT_OPTIONS = [...new Set([...DEPARTMENTS.map(d => d.name), ...EXTRA_DEPARTMENT_OPTIONS])];
+const DEPT_OPTIONS = DEPARTMENTS.map(department => department.name);
 const POSITION_OPTIONS = ['Pastor', 'Bishop', 'Invitee', 'Dept. Leader', 'Member', 'Covenant Friend', 'Other'];
 const SALEM_FAMILY_OPTIONS = [
   'SALEM FAMILY, PENTECOST CITY',
@@ -81,10 +65,6 @@ function fullName(member) {
   return `${member.first_name || ''} ${member.last_name || ''}`.trim();
 }
 
-function clean(value) {
-  return String(value || '').trim().toLowerCase();
-}
-
 function normalizePhone(value) {
   return String(value || '').replace(/\D/g, '');
 }
@@ -103,41 +83,33 @@ function getProgrammeDay(programme, date, fallbackDay = 1) {
 }
 
 async function getAttendees() {
-  const { data } = await supabase.from('greatness_attendees').select('*').order('name');
-  return data || [];
+  return getGreatnessAttendees();
 }
 
 async function getAttendanceRecords(day) {
-  const { data } = await supabase.from('greatness_attendance').select('*').eq('day_number', day);
-  return data || [];
+  return getGreatnessAttendance(day);
 }
 
 async function getAllAttendance() {
-  const { data } = await supabase.from('greatness_attendance').select('*');
-  return data || [];
+  return getGreatnessAttendance();
 }
 
 async function addAttendee(attendee) {
-  const { data, error } = await supabase.from('greatness_attendees').insert(attendee).select().single();
-  return { data, error };
+  return createGreatnessAttendee(attendee);
 }
 
 async function markAttendance(attendeeId, dayNumber, status, markedBy) {
-  const { data, error } = await supabase.from('greatness_attendance')
-    .upsert({
-      attendee_id: attendeeId,
-      day_number: dayNumber,
-      status,
-      marked_by: markedBy,
-      marked_at: new Date().toISOString(),
-    }, { onConflict: 'attendee_id,day_number' })
-    .select().single();
-  return { data, error };
+  return saveGreatnessAttendance({
+    attendee_id: attendeeId,
+    day_number: dayNumber,
+    status,
+    marked_by: markedBy,
+    marked_at: new Date().toISOString(),
+  });
 }
 
-async function getProgrammes() {
-  const { data, error } = await supabase.from('attendance_programmes').select('*').order('created_at', { ascending: false });
-  if (error) return { data: DEFAULT_PROGRAMMES, error };
+async function getProgrammes(publicCheckIn = false) {
+  const data = await fetchProgrammes(publicCheckIn);
   const merged = [...DEFAULT_PROGRAMMES];
   (data || []).forEach(programme => {
     const existing = merged.findIndex(item => item.id === programme.id);
@@ -148,110 +120,18 @@ async function getProgrammes() {
 }
 
 async function createProgramme(programme) {
-  const { data, error } = await supabase.from('attendance_programmes').insert(programme).select().single();
-  return { data, error };
+  return createProgrammeRecord(programme);
 }
 
 async function getProgrammeRecords(filters = {}) {
-  let query = supabase.from('programme_attendance_records').select('*').order('created_at', { ascending: false });
-  if (filters.programmeId) query = query.eq('programme_id', filters.programmeId);
-  if (filters.date) query = query.eq('attendance_date', filters.date);
-  const { data, error } = await query;
-  return { data: data || [], error };
+  const data = await fetchProgrammeRecords(filters);
+  return { data, error: null };
 }
 
 async function saveProgrammeRecord(record) {
   const phone = normalizePhone(record.phone);
-  let existingQuery = supabase.from('programme_attendance_records')
-    .select('id')
-    .eq('programme_id', record.programme_id)
-    .eq('attendance_date', record.attendance_date)
-    .limit(1);
-
-  existingQuery = phone
-    ? existingQuery.eq('phone_normalized', phone)
-    : existingQuery.ilike('attendee_name', record.attendee_name);
-
-  const { data: existing } = await existingQuery;
   const payload = { ...record, phone_normalized: phone, updated_at: new Date().toISOString() };
-
-  if (existing?.[0]?.id) {
-    const { data, error } = await supabase.from('programme_attendance_records')
-      .update(payload)
-      .eq('id', existing[0].id)
-      .select()
-      .single();
-    return { data, error };
-  }
-
-  const { data, error } = await supabase.from('programme_attendance_records').insert(payload).select().single();
-  return { data, error };
-}
-
-async function findExistingPerson({ name, phone }) {
-  const phoneDigits = normalizePhone(phone);
-  const targetName = clean(name);
-  const [membersResult, greatnessResult, recordsResult] = await Promise.all([
-    supabase.from('members').select('id, first_name, last_name, phone, department, status, date_of_birth').limit(5000),
-    supabase.from('greatness_attendees').select('id, name, phone, department, email').limit(5000),
-    supabase.from('programme_attendance_records').select('id, attendee_name, phone, department, church_position, salem_family, date_of_birth, email').limit(5000),
-  ]);
-
-  const people = [
-    ...(membersResult.data || []).map(member => ({
-      source: 'members',
-      id: member.id,
-      name: fullName(member),
-      phone: member.phone,
-      department: member.department,
-      church_position: member.status === 'Worker' ? 'Member' : member.status || 'Member',
-      date_of_birth: member.date_of_birth,
-    })),
-    ...(greatnessResult.data || []).map(attendee => ({
-      source: 'greatness_attendees',
-      id: attendee.id,
-      name: attendee.name,
-      phone: attendee.phone,
-      department: attendee.department,
-      church_position: 'Member',
-      email: attendee.email,
-    })),
-    ...(recordsResult.data || []).map(record => ({
-      source: 'programme_attendance_records',
-      id: record.id,
-      name: record.attendee_name,
-      phone: record.phone,
-      department: record.department,
-      church_position: record.church_position,
-      salem_family: record.salem_family,
-      date_of_birth: record.date_of_birth,
-      email: record.email,
-    })),
-  ];
-
-  return people.find(person => {
-    const personPhone = normalizePhone(person.phone);
-    if (phoneDigits && personPhone && (personPhone.endsWith(phoneDigits.slice(-10)) || phoneDigits.endsWith(personPhone.slice(-10)))) return true;
-    return targetName && clean(person.name) === targetName;
-  }) || null;
-}
-
-async function ensureGreatnessAttendee(person) {
-  const existing = await findExistingPerson({ name: person.name, phone: person.phone });
-  if (existing?.source === 'greatness_attendees') return { data: existing, error: null };
-
-  const { data: byPhone } = await supabase.from('greatness_attendees')
-    .select('*')
-    .eq('phone', person.phone || '')
-    .maybeSingle();
-  if (byPhone) return { data: byPhone, error: null };
-
-  return addAttendee({
-    name: person.name,
-    phone: person.phone || null,
-    email: person.email || null,
-    department: person.department || null,
-  });
+  return persistProgrammeRecord(payload);
 }
 
 async function saveSelfCheckIn({ programme, date, day, person, markedBy = 'QR Self Check-in' }) {
@@ -276,17 +156,7 @@ async function saveSelfCheckIn({ programme, date, day, person, markedBy = 'QR Se
     marked_at: new Date().toISOString(),
   };
 
-  const saved = await saveProgrammeRecord(record);
-  if (saved.error) return saved;
-
-  if (programme.id === GREATNESS_PROGRAMME_ID && dayNumber) {
-    const attendee = await ensureGreatnessAttendee(person);
-    if (!attendee.error && attendee.data?.id) {
-      await markAttendance(attendee.data.id, dayNumber, 'Present', markedBy);
-    }
-  }
-
-  return saved;
+  return savePublicCheckIn(record);
 }
 
 export default function LeadershipTraining() {
@@ -504,8 +374,7 @@ function QrAttendance() {
   useEffect(() => {
     getProgrammes().then(result => {
       setProgrammes(result.data);
-      if (result.error) setMessage({ type: 'warning', text: 'Programme tables are not ready yet. Run the Supabase SQL in README to save QR attendance records.' });
-    });
+    }).catch(error => setMessage({ type: 'danger', text: error.message }));
   }, []);
 
   useEffect(() => { loadRecords(); }, [programmeId, selectedDate]);
@@ -827,34 +696,39 @@ export function PublicAttendanceCheckIn() {
   const [alert, setAlert] = useState(null);
 
   useEffect(() => {
-    getProgrammes().then(result => {
+    getProgrammes(true).then(result => {
       const found = result.data.find(p => p.id === programmeId);
       if (found) setProgramme(found);
-    });
+    }).catch(error => setAlert({ type: 'danger', text: error.message }));
   }, [programmeId]);
 
   const handleLookup = async e => {
     e.preventDefault();
-    if (!lookup.name && !lookup.phone) {
-      setAlert({ type: 'warning', text: 'Enter your name or phone number first.' });
+    if (!lookup.name.trim() || !lookup.phone.trim()) {
+      setAlert({ type: 'warning', text: 'Enter both your full name and phone number to look for an existing record.' });
       return;
     }
     setLoading(true);
     setAlert(null);
-    const found = await findExistingPerson(lookup);
-    setMatch(found);
-    if (found) {
-      setDetails({
-        salem_family: found.salem_family || '',
-        date_of_birth: found.date_of_birth || '',
-        email: found.email || '',
-        department: found.department || '',
-        church_position: found.church_position || 'Member',
-        other_position: '',
-      });
+    try {
+      const found = await findExistingPerson(lookup);
+      setMatch(found);
+      if (found) {
+        setDetails({
+          salem_family: found.salem_family || '',
+          date_of_birth: found.date_of_birth || '',
+          email: found.email || '',
+          department: found.department || '',
+          church_position: found.church_position || 'Member',
+          other_position: '',
+        });
+      }
+      setStage(found ? 'confirm' : 'details');
+    } catch (error) {
+      setAlert({ type: 'danger', text: error.message });
+    } finally {
+      setLoading(false);
     }
-    setStage(found ? 'confirm' : 'details');
-    setLoading(false);
   };
 
   const submit = async e => {

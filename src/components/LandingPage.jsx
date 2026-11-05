@@ -5,6 +5,7 @@ import {
   MessageSquare, BarChart3, Shield, ChevronRight,
   BookOpen, UserCheck, Bell, ArrowRight, Menu, X
 } from 'lucide-react';
+import { DEPARTMENTS } from '../data/constants';
 
 const C = {
   navy: '#0C1B3A', navyLight: '#162847', navyMid: '#1E3560',
@@ -316,7 +317,7 @@ export default function LandingPage({ onEnter }) {
             <div style={{ width: 56, height: 3, background: C.gold, borderRadius: 2, marginBottom: '1.25rem' }} />
 
             <p style={{ fontSize: 16, color: 'rgba(255,255,255,.65)', lineHeight: 1.75, marginBottom: '2rem', maxWidth: 460 }}>
-              A dedicated platform for managing church operations — from member records and KDF zones to departmental activities, events, and pastoral follow-ups. Built for SICC leadership.
+              A central platform for managing church operations, including member records, KDF areas, departmental activities, events, and pastoral follow-up. Designed for SICC leadership.
             </p>
 
             <div className="landing-actions" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -332,7 +333,7 @@ export default function LandingPage({ onEnter }) {
             <div className="landing-hero-stats" style={{ display: 'flex', gap: '2.5rem', marginTop: '2.5rem', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,.1)' }}>
               {[
                 { n: 41, suffix: '+', label: 'KDF Areas' },
-                { n: 14, suffix: '', label: 'Departments' },
+                { n: DEPARTMENTS.length, suffix: '', label: 'Departments' },
                 { n: 5, suffix: '', label: 'Access Roles' },
               ].map(({ n, suffix, label }) => (
                 <div key={label}>
@@ -345,7 +346,7 @@ export default function LandingPage({ onEnter }) {
             </div>
           </div>
 
-          {/* right — floating cards */}
+          {/* Right column: floating cards */}
           <div className="landing-hero-visual" style={{ position: 'relative', height: 460 }}>
 
             {/* main dashboard card */}
@@ -355,7 +356,7 @@ export default function LandingPage({ onEnter }) {
               boxShadow: '0 24px 64px rgba(0,0,0,.35)',
             }}>
               <div style={{ background: C.navy, padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 12, color: 'rgba(255,255,255,.7)', fontWeight: 500 }}>Dashboard — Admin View</span>
+                <span style={{ fontSize: 12, color: 'rgba(255,255,255,.7)', fontWeight: 500 }}>Admin Dashboard</span>
                 <span style={{ fontSize: 11, color: C.gold }}>● Live</span>
               </div>
               <div style={{ padding: '14px 16px' }}>
@@ -363,7 +364,7 @@ export default function LandingPage({ onEnter }) {
                   {[
                     { label: 'Members', val: '348', color: '#185FA5' },
                     { label: 'KDF Zones', val: '41', color: C.gold },
-                    { label: 'Depts', val: '14', color: '#2E7D32' },
+                    { label: 'Depts', val: String(DEPARTMENTS.length), color: '#2E7D32' },
                   ].map(({ label, val, color }) => (
                     <div key={label} style={{ background: C.cream, borderRadius: 8, padding: '10px 8px', textAlign: 'center' }}>
                       <div style={{ fontSize: 18, fontWeight: 600, color }}>{val}</div>
@@ -446,9 +447,9 @@ export default function LandingPage({ onEnter }) {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
           {[
-            { icon: <Users size={22} color="#185FA5" />, bg: '#E6F1FB', title: 'Member Management', desc: 'Maintain complete records for every church member — personal info, spiritual status, affinity group, KDF zone, and ministry involvement.' },
+            { icon: <Users size={22} color="#185FA5" />, bg: '#E6F1FB', title: 'Member Management', desc: 'Maintain complete member records, including contact details, spiritual status, affinity group, KDF area, and ministry involvement.' },
             { icon: <MapPin size={22} color={C.gold} />, bg: C.goldPale, title: 'KDF Zone Tracking', desc: 'Manage all 41 Kingdom Dominion Fellowship zones across Lagos. Assign coordinators, track members per zone, and monitor outreach activity.' },
-            { icon: <Building2 size={22} color="#6A1B9A" />, bg: '#F3E5F5', title: 'Department Coordination', desc: 'Oversee all 14 departments including Choir, Protocol, Ushering, Media, Prayer, WTS, and more. Track membership and leadership per unit.' },
+            { icon: <Building2 size={22} color="#6A1B9A" />, bg: '#F3E5F5', title: 'Department Coordination', desc: `Oversee all ${DEPARTMENTS.length} departments and track membership and leadership for each unit.` },
             { icon: <UserCheck size={22} color="#2E7D32" />, bg: '#EAF3DE', title: 'Follow-up & Discipleship', desc: 'Log pastoral follow-ups for new converts and evangelism contacts. Record visit outcomes, phone calls, and WhatsApp engagements.' },
             { icon: <CalendarDays size={22} color="#185FA5" />, bg: '#E6F1FB', title: 'Events & Services', desc: 'Track Sunday services, mid-week programmes, prayer nights, conferences, and departmental meetings with attendance records.' },
             { icon: <BarChart3 size={22} color={C.gold} />, bg: C.goldPale, title: 'Reports & Analytics', desc: 'Visual dashboards for the Bishop, Admin, and Pastors to monitor growth, attendance trends, and church-wide metrics at a glance.' },
@@ -476,16 +477,16 @@ export default function LandingPage({ onEnter }) {
                 Built around the way<br /><span className="gold-em">SICC actually operates.</span>
               </h2>
               <p style={{ color: 'rgba(255,255,255,.55)', fontSize: 15, maxWidth: 500, margin: '0 auto', lineHeight: 1.7 }}>
-                The system mirrors your church's real structure — roles, departments, and KDF zones — so nothing needs to be re-learned.
+                The system reflects your church's structure, including roles, departments, and KDF areas, so staff can work within familiar processes.
               </p>
             </div>
           </FadeIn>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem' }}>
             {[
-              { num: '01', icon: <Shield size={20} color={C.gold} />, title: 'You Sign In', desc: 'Each user logs in with their SICC credentials. The system immediately recognises your role — Bishop, Admin, Pastor, Dept. Leader, or KDF Coordinator.' },
-              { num: '02', icon: <Users size={20} color={C.gold} />, title: 'Your View Loads', desc: 'Your personalised dashboard appears with only what is relevant to your role. No clutter. Just your data — members, zones, or department records.' },
-              { num: '03', icon: <BookOpen size={20} color={C.gold} />, title: 'Manage & Record', desc: 'Add members, log attendance, record follow-ups, update departmental info, or view KDF zone reports — all from one screen.' },
+              { num: '01', icon: <Shield size={20} color={C.gold} />, title: 'Sign In', desc: 'Sign in with your SICC credentials. The portal provides access based on your role: Bishop, Admin, Pastor, Department Leader, or KDF Coordinator.' },
+              { num: '02', icon: <Users size={20} color={C.gold} />, title: 'View Your Dashboard', desc: 'Your dashboard presents the information relevant to your role, including member, KDF area, or department records.' },
+              { num: '03', icon: <BookOpen size={20} color={C.gold} />, title: 'Manage Records', desc: 'Register members, record attendance and follow-ups, update department information, and review KDF area reports.' },
               { num: '04', icon: <BarChart3 size={20} color={C.gold} />, title: 'Leadership Reviews', desc: 'Bishops and Admins see church-wide analytics. Pastors review pastoral activity. Every decision is backed by accurate, real-time data.' },
             ].map(({ num, icon, title, desc }, i) => (
               <FadeIn key={title} delay={i * 0.1}>
@@ -543,12 +544,12 @@ export default function LandingPage({ onEnter }) {
       <section style={{ background: C.cream, borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}`, padding: 'clamp(4rem, 8vw, 5rem) clamp(1.25rem, 5vw, 3rem)' }}>
         <div className="landing-kdf-grid" style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '4rem', alignItems: 'center' }}>
           <FadeIn>
-            <div style={{ fontSize: 12, color: C.gold, textTransform: 'uppercase', letterSpacing: '.1em', fontWeight: 600, marginBottom: '.75rem' }}>KDF — Kingdom Dominion Fellowship</div>
+            <div style={{ fontSize: 12, color: C.gold, textTransform: 'uppercase', letterSpacing: '.1em', fontWeight: 600, marginBottom: '.75rem' }}>KDF: Kingdom Dominion Fellowship</div>
             <h2 className="serif" style={{ fontSize: 'clamp(1.7rem, 3vw, 2.3rem)', color: C.navy, fontWeight: 400, marginBottom: '1rem' }}>
               41 zones. <span className="gold-em">One system.</span>
             </h2>
             <p style={{ color: C.textSec, fontSize: 15, lineHeight: 1.75, marginBottom: '1.5rem' }}>
-              SICC's KDF network spans 41 fellowship zones across Lagos — from Ikoyi and Lekki to Ibeju-Lekki, Ikorodu, and beyond. Each zone has a dedicated coordinator, and this portal tracks them all.
+              SICC's KDF network includes 41 fellowship areas across Lagos, including Ikoyi, Lekki, Ibeju-Lekki, and Ikorodu. Each area has a dedicated coordinator, and the portal supports area management and reporting.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {['Assign and track zone coordinators', 'View all members per KDF area', 'Smart address matching to zones', 'Monitor zone-level outreach progress'].map(point => (
@@ -594,12 +595,12 @@ export default function LandingPage({ onEnter }) {
             Built specifically for <span className="gold-em">SICC</span>
           </h2>
           <p style={{ color: C.textSec, fontSize: 15, lineHeight: 1.8, maxWidth: 640, margin: '0 auto 1.5rem' }}>
-            This is not a generic church software — it was designed from the ground up for Salem International Christian Centre. Every module, every field, and every role reflects exactly how SICC is structured and how its administration works day to day.
+            This platform was developed for Salem International Christian Centre. Its modules, records, and access roles reflect SICC's structure and administrative processes.
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '3rem', flexWrap: 'wrap', marginBottom: '2.5rem' }}>
             {[
               { val: '41+', label: 'KDF Areas' },
-              { val: '14', label: 'Departments' },
+              { val: String(DEPARTMENTS.length), label: 'Departments' },
               { val: '5', label: 'Role Types' },
               { val: '100%', label: 'SICC-specific' },
             ].map(({ val, label }) => (
@@ -635,7 +636,7 @@ export default function LandingPage({ onEnter }) {
           <img src="/salem-logo.png" alt="" style={{ width: 28, height: 28, objectFit: 'contain', mixBlendMode: 'screen' }} />
           <span className="serif" style={{ fontSize: 14, color: 'rgba(255,255,255,.5)', fontWeight: 400 }}>Salem International Christian Centre</span>
         </div>
-        <span style={{ fontSize: 12, color: 'rgba(255,255,255,.3)' }}>SICC Admin Portal — For internal use only</span>
+        <span style={{ fontSize: 12, color: 'rgba(255,255,255,.3)' }}>SICC Admin Portal | For internal use only</span>
       </footer>
     </div>
   );

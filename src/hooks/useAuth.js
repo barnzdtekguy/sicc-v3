@@ -1,6 +1,6 @@
 // src/hooks/useAuth.js
 import { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { apiRequest } from '../lib/api';
 
 const AuthContext = createContext(null);
 
@@ -10,58 +10,42 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) { setUser(session.user); fetchProfile(session.user.email); }
-      else setLoading(false);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (session) { setUser(session.user); fetchProfile(session.user.email); }
-      else { setUser(null); setProfile(null); setLoading(false); }
-    });
-    return () => subscription.unsubscribe();
+    let active = true;
+    apiRequest('/auth/me')
+      .then(({ user: sessionUser, profile: sessionProfile }) => {
+        if (active) {
+          setUser(sessionUser);
+          setProfile(sessionProfile);
+        }
+      })
+      .catch(error => {
+        if (error.message !== 'Please sign in to continue.' && error.message !== 'Your session has expired. Please sign in again.') {
+          console.error('Unable to restore the SICC Admin session:', error);
+        }
+        if (active) {
+          setUser(null);
+          setProfile(null);
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => { active = false; };
   }, []);
 
-  const fetchProfile = async (email) => {
-    try {
-      const { data } = await supabase.from('profiles').select('*').eq('email', email).maybeSingle();
-      setProfile(data || null);
-    } catch (e) { console.error(e); }
-    finally { setLoading(false); }
-  };
-
-  const login = async (identifier, password, identifierType = 'email') => {
+  const login = async (identifier, password, identifierType = 'email', rememberMe = true) => {
     try {
       const normalizedIdentifier = String(identifier || '').trim();
       if (!normalizedIdentifier) {
         return { success: false, error: 'Please enter your identifier.' };
       }
 
-      let emailToUse = normalizedIdentifier;
-
-      if (identifierType === 'username' || !normalizedIdentifier.includes('@')) {
-        const lookupQueries = [
-          supabase.from('profiles').select('email').eq('username', normalizedIdentifier).maybeSingle(),
-          supabase.from('profiles').select('email').eq('email', normalizedIdentifier).maybeSingle(),
-        ];
-
-        const results = await Promise.allSettled(lookupQueries);
-        const [usernameResult, emailResult] = results;
-
-        const profile = usernameResult.status === 'fulfilled' && usernameResult.value?.data?.email
-          ? usernameResult.value.data
-          : emailResult.status === 'fulfilled' && emailResult.value?.data?.email
-            ? emailResult.value.data
-            : null;
-
-        if (profile?.email) {
-          emailToUse = profile.email;
-        } else if (identifierType === 'username') {
-          return { success: false, error: 'We could not find an account for that username. Please request access from Admin.' };
-        }
-      }
-
-      const { error } = await supabase.auth.signInWithPassword({ email: emailToUse, password });
-      if (error) return { success: false, error: error.message };
+      const session = await apiRequest('/auth/login', {
+        method: 'POST',
+        body: { identifier: normalizedIdentifier, password, identifierType, rememberMe },
+      });
+      setUser(session.user);
+      setProfile(session.profile);
       return { success: true };
     } catch (error) {
       return { success: false, error: error?.message || 'Unable to sign in. Please try again.' };
@@ -69,8 +53,12 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
-    setUser(null); setProfile(null);
+    try {
+      await apiRequest('/auth/logout', { method: 'POST' });
+    } finally {
+      setUser(null);
+      setProfile(null);
+    }
   };
 
   return (

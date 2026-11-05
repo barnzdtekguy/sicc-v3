@@ -35,7 +35,7 @@ function Overview() {
         <StatCard label="Active Members" value={members.filter(m => m.status === 'Active Member').length} icon={<CheckSquare size={18} />} color={C.success} />
         <StatCard label="New Converts" value={members.filter(m => m.status === 'New Convert').length} icon={<Star size={18} />} color={C.blue} />
       </Grid>
-      <Panel title={`${myDept} — Member List`}>
+      <Panel title={`${myDept}: Member List`}>
         <DataTable
           columns={[
             { key: 'name', label: 'Name', render: (_, r) => <strong style={{ color: C.textPrimary }}>{r.first_name} {r.last_name}</strong> },
@@ -77,9 +77,9 @@ function DeptMembers() {
             { key: 'phone', label: 'Phone' },
             { key: 'address', label: 'Address' },
             { key: 'kdf_area', label: 'KDF Area', render: v => <Badge label={v} color={C.purple} /> },
-            { key: 'affinity_group', label: 'Affinity', render: v => v ? <Badge label={v} color={C.blue} /> : '—' },
+            { key: 'affinity_group', label: 'Affinity', render: v => v ? <Badge label={v} color={C.blue} /> : 'N/A' },
             { key: 'status', label: 'Status', render: v => <StatusBadge status={v} /> },
-            { key: 'date_of_birth', label: 'DOB', render: v => v || '—' },
+            { key: 'date_of_birth', label: 'DOB', render: v => v || 'N/A' },
             { key: 'spiritual_status', label: 'Spiritual' },
           ]}
           rows={filtered}
@@ -125,13 +125,13 @@ function DeptAttendance() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
         <Grid cols="repeat(3, 1fr)" gap={12}>
-          <StatCard label="Last Service" value={records[0]?.dept_count ?? '—'} icon={<CheckSquare size={18} />} color={deptColor} sub={records[0]?.service} />
+          <StatCard label="Last Service" value={records[0]?.dept_count ?? 'N/A'} icon={<CheckSquare size={18} />} color={deptColor} sub={records[0]?.service} />
           <StatCard label="Sessions Logged" value={records.length} icon={<Calendar size={18} />} color={C.gold} />
-          <StatCard label="Average" value={avg || '—'} icon={<Activity size={18} />} color={C.success} />
+          <StatCard label="Average" value={avg || 'N/A'} icon={<Activity size={18} />} color={C.success} />
         </Grid>
         <Btn onClick={() => setShowModal(true)} color={C.navy}><CheckSquare size={14} /> Mark Attendance</Btn>
       </div>
-      <Panel title={`${myDept} — Attendance Records`}>
+      <Panel title={`${myDept}: Attendance Records`}>
         <DataTable
           columns={[
             { key: 'date', label: 'Date' },
@@ -180,7 +180,7 @@ function Reports() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div style={{ background: `${deptColor}0D`, border: `1px solid ${deptColor}25`, borderRadius: 12, padding: '16px 20px' }}>
-        <div style={{ fontSize: 13, fontWeight: 500, color: deptColor, marginBottom: 10 }}>{myDept} — Summary (Visible to Bishop and Admin)</div>
+        <div style={{ fontSize: 13, fontWeight: 500, color: deptColor, marginBottom: 10 }}>Summary for {myDept} (visible to Bishop and Admin)</div>
         <Grid cols="repeat(4, 1fr)" gap={12}>
           {[{ v: members.length, l: 'Total' }, { v: members.filter(m => m.status === 'Worker').length, l: 'Workers' }, { v: members.filter(m => m.status === 'Active Member').length, l: 'Active' }, { v: members.filter(m => m.status === 'New Convert').length, l: 'New Converts' }].map((s, i) => (
             <div key={i}><div style={{ fontSize: 22, fontWeight: 500, color: C.textPrimary }}>{s.v}</div><div style={{ fontSize: 11, color: C.textMuted }}>{s.l}</div></div>

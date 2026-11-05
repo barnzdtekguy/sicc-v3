@@ -25,7 +25,7 @@ function Overview() {
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <div>
             <div style={{ fontSize: 18, fontWeight: 500, color: C.textPrimary, display: 'flex', alignItems: 'center', gap: 8 }}><MapPin size={18} color={C.danger} /> {myArea}</div>
-            <div style={{ fontSize: 13, color: C.textSecondary, marginTop: 2 }}>KDF Area Coordinator — {profile?.name}</div>
+            <div style={{ fontSize: 13, color: C.textSecondary, marginTop: 2 }}>KDF Area Coordinator: {profile?.name}</div>
             <div style={{ fontSize: 12, color: C.textMuted, marginTop: 2 }}>Your activities are visible to Bishop and Admin.</div>
           </div>
           <Badge label={`${members.length} members`} color={C.danger} />
@@ -50,7 +50,7 @@ function Overview() {
           columns={[
             { key: 'name', label: 'Name', render: (_, r) => <strong style={{ color: C.textPrimary }}>{r.first_name} {r.last_name}</strong> },
             { key: 'phone', label: 'Phone' },
-            { key: 'department', label: 'Department', render: v => v || '—' },
+            { key: 'department', label: 'Department', render: v => v || 'N/A' },
             { key: 'status', label: 'Status', render: v => <StatusBadge status={v} /> },
             { key: 'follow_up_count', label: 'Follow-Ups', render: v => <Badge label={v || 0} color={C.gold} /> },
           ]}
@@ -86,10 +86,10 @@ function KDFMembers() {
             { key: 'name', label: 'Full Name', render: (_, r) => <strong style={{ color: C.textPrimary }}>{r.first_name} {r.last_name}</strong> },
             { key: 'phone', label: 'Phone' },
             { key: 'address', label: 'Address' },
-            { key: 'department', label: 'Department', render: v => v || '—' },
-            { key: 'affinity_group', label: 'Affinity', render: v => v ? <Badge label={v} color={C.blue} /> : '—' },
+            { key: 'department', label: 'Department', render: v => v || 'N/A' },
+            { key: 'affinity_group', label: 'Affinity', render: v => v ? <Badge label={v} color={C.blue} /> : 'N/A' },
             { key: 'status', label: 'Status', render: v => <StatusBadge status={v} /> },
-            { key: 'date_of_birth', label: 'DOB', render: v => v || '—' },
+            { key: 'date_of_birth', label: 'DOB', render: v => v || 'N/A' },
             { key: 'spiritual_status', label: 'Spiritual' },
             { key: 'registered_by_name', label: 'Registered By' },
           ]}
@@ -158,14 +158,14 @@ function FollowUp() {
         <Btn onClick={() => setShowModal(true)} color={C.navy}><Phone size={14} /> Log Follow-Up</Btn>
       </div>
 
-      <Panel title={`Follow-Up Log — ${myArea}`}>
+      <Panel title={`Follow-Up Log: ${myArea}`}>
         <DataTable
           columns={[
             { key: 'member_name', label: 'Member' },
             { key: 'date', label: 'Date' },
             { key: 'method', label: 'Method', render: v => <Badge label={v} color={C.blue} /> },
             { key: 'notes', label: 'Notes', render: v => <span style={{ color: C.textSecondary, fontSize: 12, maxWidth: 200, display: 'inline-block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v}</span> },
-            { key: 'outcome', label: 'Outcome', render: v => v || '—' },
+            { key: 'outcome', label: 'Outcome', render: v => v || 'N/A' },
             { key: 'status', label: 'Status', render: v => <StatusBadge status={v} /> },
           ]}
           rows={followUps}
@@ -219,7 +219,7 @@ function Reports() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div style={{ background: `${C.danger}0A`, border: `1px solid ${C.danger}20`, borderRadius: 12, padding: '16px 20px' }}>
-        <div style={{ fontSize: 13, fontWeight: 500, color: C.danger, marginBottom: 10 }}>{myArea} — Area Report (Visible to Bishop and Admin)</div>
+        <div style={{ fontSize: 13, fontWeight: 500, color: C.danger, marginBottom: 10 }}>Area report for {myArea} (visible to Bishop and Admin)</div>
         <Grid cols="repeat(4, 1fr)" gap={12}>
           {[{ v: members.length, l: 'Total Members' }, { v: members.filter(m => m.status === 'New Convert').length, l: 'New Converts' }, { v: followUps.length, l: 'Follow-Ups' }, { v: followUps.filter(f => f.status === 'Completed').length, l: 'Completed' }].map((s, i) => (
             <div key={i}><div style={{ fontSize: 22, fontWeight: 500, color: C.textPrimary }}>{s.v}</div><div style={{ fontSize: 11, color: C.textMuted }}>{s.l}</div></div>

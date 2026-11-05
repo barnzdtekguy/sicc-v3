@@ -1,76 +1,131 @@
-// src/lib/db.js
-import { supabase } from './supabase';
+import { apiRequest, mutationResult } from './api';
 
-export async function addLog(userId, userName, action, detail) {
-  await supabase.from('activity_logs').insert({ user_id: userId, user_name: userName, action, detail });
+function queryString(params) {
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') search.set(key, value);
+  });
+  const serialized = search.toString();
+  return serialized ? `?${serialized}` : '';
 }
+
+export async function addLog(_userId, _userName, action, detail) {
+  return apiRequest('/activity-logs', { method: 'POST', body: { action, detail } });
+}
+
 export async function getLogs(limit = 50) {
-  const { data } = await supabase.from('activity_logs').select('*').order('created_at', { ascending: false }).limit(limit);
-  return data || [];
+  return apiRequest(`/activity-logs${queryString({ limit })}`);
 }
+
 export async function getProfiles() {
-  const { data } = await supabase.from('profiles').select('*').order('name');
-  return data || [];
+  return apiRequest('/profiles');
 }
-export async function createProfile(profile) {
-  const { data, error } = await supabase.from('profiles').insert(profile).select().single();
-  return { data, error };
+
+export async function createProfile(profile, password) {
+  return mutationResult('/profiles', { method: 'POST', body: { ...profile, password } });
 }
+
 export async function deleteProfile(id) {
-  const { error } = await supabase.from('profiles').delete().eq('id', id);
+  const { error } = await mutationResult(`/profiles/${encodeURIComponent(id)}`, { method: 'DELETE' });
   return { error };
 }
+
 export async function getMembers(filters = {}) {
-  let query = supabase.from('members').select('*').order('created_at', { ascending: false });
-  if (filters.registeredBy) query = query.eq('registered_by', filters.registeredBy);
-  if (filters.kdfArea) query = query.eq('kdf_area', filters.kdfArea);
-  if (filters.department) query = query.eq('department', filters.department);
-  const { data } = await query;
-  return data || [];
+  return apiRequest(`/members${queryString({
+    registeredBy: filters.registeredBy,
+    kdfArea: filters.kdfArea,
+    department: filters.department,
+  })}`);
 }
+
 export async function createMember(member) {
-  const { data, error } = await supabase.from('members').insert(member).select().single();
-  return { data, error };
+  return mutationResult('/members', { method: 'POST', body: member });
 }
+
 export async function getFollowUps(filters = {}) {
-  let query = supabase.from('follow_ups').select('*').order('created_at', { ascending: false });
-  if (filters.pastorId) query = query.eq('pastor_id', filters.pastorId);
-  if (filters.kdfArea) query = query.eq('kdf_area', filters.kdfArea);
-  const { data } = await query;
-  return data || [];
+  return apiRequest(`/follow-ups${queryString({
+    pastorId: filters.pastorId,
+    kdfArea: filters.kdfArea,
+  })}`);
 }
-export async function createFollowUp(f) {
-  const { data, error } = await supabase.from('follow_ups').insert(f).select().single();
-  return { data, error };
+
+export async function createFollowUp(followUp) {
+  return mutationResult('/follow-ups', { method: 'POST', body: followUp });
 }
+
 export async function getAttendance() {
-  const { data } = await supabase.from('attendance').select('*').order('date', { ascending: false });
-  return data || [];
+  return apiRequest('/attendance');
 }
+
 export async function createAttendance(record) {
-  const { data, error } = await supabase.from('attendance').insert(record).select().single();
-  return { data, error };
+  return mutationResult('/attendance', { method: 'POST', body: record });
 }
+
 export async function getAssignments() {
-  const { data } = await supabase.from('assignments').select('*').order('created_at', { ascending: false });
-  return data || [];
+  return apiRequest('/assignments');
 }
-export async function createAssignment(a) {
-  const { data, error } = await supabase.from('assignments').insert(a).select().single();
-  return { data, error };
+
+export async function createAssignment(assignment) {
+  return mutationResult('/assignments', { method: 'POST', body: assignment });
 }
+
 export async function updateAssignment(id, updates) {
-  const { data, error } = await supabase.from('assignments').update(updates).eq('id', id).select().single();
-  return { data, error };
+  return mutationResult(`/assignments/${encodeURIComponent(id)}`, { method: 'PATCH', body: updates });
 }
+
 export async function deleteAssignment(id) {
-  await supabase.from('assignments').delete().eq('id', id);
-}
-export async function getSMSConfig() {
-  const { data } = await supabase.from('sms_config').select('*').eq('id', 1).maybeSingle();
-  return data || { api_key: '', sender_id: 'SICC' };
-}
-export async function saveSMSConfig(config) {
-  const { error } = await supabase.from('sms_config').upsert({ id: 1, ...config });
+  const { error } = await mutationResult(`/assignments/${encodeURIComponent(id)}`, { method: 'DELETE' });
   return { error };
+}
+
+export async function getSMSConfig() {
+  return apiRequest('/sms-config');
+}
+
+export async function saveSMSConfig(config) {
+  const { error } = await mutationResult('/sms-config', { method: 'PUT', body: config });
+  return { error };
+}
+
+export async function getGreatnessAttendees() {
+  return apiRequest('/greatness/attendees');
+}
+
+export async function getGreatnessAttendance(day) {
+  return apiRequest(`/greatness/attendance${queryString({ day })}`);
+}
+
+export async function createGreatnessAttendee(attendee) {
+  return mutationResult('/greatness/attendees', { method: 'POST', body: attendee });
+}
+
+export async function saveGreatnessAttendance(record) {
+  return mutationResult('/greatness/attendance', { method: 'POST', body: record });
+}
+
+export async function getProgrammes(publicCheckIn = false) {
+  return apiRequest(`/programmes${queryString({ public: publicCheckIn ? '1' : '' })}`);
+}
+
+export async function createProgramme(programme) {
+  return mutationResult('/programmes', { method: 'POST', body: programme });
+}
+
+export async function getProgrammeRecords(filters = {}) {
+  return apiRequest(`/programme-attendance-records${queryString({
+    programmeId: filters.programmeId,
+    date: filters.date,
+  })}`);
+}
+
+export async function saveProgrammeRecord(record) {
+  return mutationResult('/programme-attendance-records', { method: 'POST', body: record });
+}
+
+export async function findExistingPerson(person) {
+  return apiRequest('/public/attendance/match', { method: 'POST', body: person });
+}
+
+export async function savePublicCheckIn(record) {
+  return mutationResult('/public/attendance/check-in', { method: 'POST', body: record });
 }

@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { StatCard, Panel, Badge, DataTable, Btn, Modal, Input, Select, Textarea, SearchInput, C, Alert, Avatar, InfoRow, StatusBadge, SectionTitle, Grid, FilterSelect, EmptyState } from '../shared/UI';
 import { getMembers, getProfiles, createProfile, deleteProfile, getFollowUps, getAttendance, createAttendance, getLogs, getSMSConfig, saveSMSConfig, addLog } from '../../lib/db';
-import { supabase } from '../../lib/supabase';
 import { DEPARTMENTS, KDF_AREAS, ROLES, ROLE_COLORS, ROLE_LABELS, SERVICE_TYPES } from '../../data/constants';
 import { Users, UserCheck, MapPin, Building2, CheckSquare, TrendingUp, Phone, ClipboardList, BarChart2, Calendar, Activity, Briefcase, MessageSquare, Map, Settings, UserPlus } from 'lucide-react';
 
@@ -70,7 +69,7 @@ function Overview({ setActiveTab }) {
               <div key={i} style={{ display: 'flex', gap: 10, padding: '8px 0', borderBottom: `0.5px solid ${C.border}` }}>
                 <div style={{ width: 7, height: 7, borderRadius: '50%', background: C.gold, marginTop: 5, flexShrink: 0 }} />
                 <div>
-                  <div style={{ fontSize: 13, color: C.textPrimary }}><strong style={{ fontWeight: 500 }}>{item.user_name}</strong><span style={{ color: C.textSecondary }}> — {item.action}</span></div>
+                  <div style={{ fontSize: 13, color: C.textPrimary }}><strong style={{ fontWeight: 500 }}>{item.user_name}</strong><span style={{ color: C.textSecondary }}>: {item.action}</span></div>
                   <div style={{ fontSize: 11, color: C.textMuted, marginTop: 2 }}>{item.detail} · {new Date(item.created_at).toLocaleString('en-NG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
                 </div>
               </div>
@@ -134,18 +133,6 @@ function UserManagement() {
       return;
     }
     setLoading(true);
-    // Step 1 — Create Supabase Auth user
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: form.email,
-      password: form.password,
-      options: { data: { name: form.name, role: form.role } }
-    });
-    if (authError) {
-      setMsg({ type: 'danger', text: authError.message });
-      setLoading(false);
-      return;
-    }
-    // Step 2 — Create profile
     const avatar = form.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
     const { data, error } = await createProfile({
       name: form.name, email: form.email, phone: form.phone || null,
@@ -153,7 +140,7 @@ function UserManagement() {
       department: form.role === ROLES.DEPARTMENT_LEADER ? form.department : null,
       kdf_area: form.role === ROLES.KDF_COORDINATOR ? form.kdfArea : null,
       avatar,
-    });
+    }, form.password);
     if (error) { setMsg({ type: 'danger', text: error.message }); setLoading(false); return; }
     await addLog(currentProfile.id, currentProfile.name, 'Created user', `${form.name} (${ROLE_LABELS[form.role]})`);
     setProfiles([...profiles, data]);
@@ -184,9 +171,9 @@ function UserManagement() {
             { key: 'avatar', label: '', render: (v, r) => <Avatar initials={v} color={ROLE_COLORS[r.role] || C.blue} size={34} /> },
             { key: 'name', label: 'Full Name', render: v => <strong style={{ color: C.textPrimary }}>{v}</strong> },
             { key: 'role', label: 'Role', render: v => <Badge label={ROLE_LABELS[v] || v} color={ROLE_COLORS[v] || C.blue} /> },
-            { key: 'email', label: 'Email', render: v => v || '—' },
-            { key: 'phone', label: 'Phone', render: v => v || '—' },
-            { key: 'department', label: 'Dept / Area', render: (v, r) => v || r.kdf_area || '—' },
+            { key: 'email', label: 'Email', render: v => v || 'N/A' },
+            { key: 'phone', label: 'Phone', render: v => v || 'N/A' },
+            { key: 'department', label: 'Dept / Area', render: (v, r) => v || r.kdf_area || 'N/A' },
             { key: 'actions', label: '', render: (_, r) => r.id !== currentProfile?.id ? <Btn size="sm" variant="ghost" color={C.danger} onClick={() => handleDelete(r.id)}>Remove</Btn> : <span style={{ fontSize: 11, color: C.textMuted }}>You</span> },
           ]}
           rows={displayProfiles} emptyText="No staff created yet."
@@ -278,9 +265,9 @@ function AllMembers() {
             { key: 'phone', label: 'Phone' },
             { key: 'address', label: 'Address' },
             { key: 'kdf_area', label: 'KDF Area', render: v => <Badge label={v} color={C.purple} /> },
-            { key: 'department', label: 'Department', render: v => v || '—' },
+            { key: 'department', label: 'Department', render: v => v || 'N/A' },
             { key: 'status', label: 'Status', render: v => <StatusBadge status={v} /> },
-            { key: 'date_of_birth', label: 'DOB', render: v => v || '—' },
+            { key: 'date_of_birth', label: 'DOB', render: v => v || 'N/A' },
             { key: 'spiritual_status', label: 'Spiritual' },
             { key: 'registered_by_name', label: 'Registered By' },
           ]}
@@ -366,9 +353,9 @@ function Attendance() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
         <Grid cols="repeat(3, 1fr)" gap={12}>
-          <StatCard label="Last Service" value={records[0]?.count ?? '—'} icon={<CheckSquare size={18} />} color={C.blue} sub={records[0]?.service} />
+          <StatCard label="Last Service" value={records[0]?.count ?? 'N/A'} icon={<CheckSquare size={18} />} color={C.blue} sub={records[0]?.service} />
           <StatCard label="Services Logged" value={records.length} icon={<Calendar size={18} />} color={C.gold} />
-          <StatCard label="Average" value={records.length ? Math.round(records.reduce((a, b) => a + b.count, 0) / records.length) : '—'} icon={<Activity size={18} />} color={C.success} />
+          <StatCard label="Average" value={records.length ? Math.round(records.reduce((a, b) => a + b.count, 0) / records.length) : 'N/A'} icon={<Activity size={18} />} color={C.success} />
         </Grid>
         <Btn onClick={() => setShowModal(true)} color={C.navy}><CheckSquare size={14} /> Record Attendance</Btn>
       </div>
@@ -425,7 +412,7 @@ function FollowUps() {
           { key: 'member_name', label: 'Member', render: v => <strong style={{ color: C.textPrimary }}>{v}</strong> },
           { key: 'pastor_name', label: 'Pastor' },
           { key: 'date', label: 'Date' },
-          { key: 'method', label: 'Method', render: v => v ? <Badge label={v} color={C.blue} /> : '—' },
+          { key: 'method', label: 'Method', render: v => v ? <Badge label={v} color={C.blue} /> : 'N/A' },
           { key: 'notes', label: 'Notes', render: v => <span style={{ color: C.textSecondary, fontSize: 12, maxWidth: 200, display: 'inline-block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v}</span> },
           { key: 'status', label: 'Status', render: v => <StatusBadge status={v} /> },
           { key: 'view', label: '', render: (_, r) => <Btn size="sm" variant="ghost" color={C.gold} onClick={() => setSelected(r)}>View</Btn> },
@@ -495,11 +482,11 @@ function Settings_() {
       </Panel>
       <Panel title="System Information">
         <InfoRow icon={<Building2 size={14} />} label="Church Name" value="Salem International Christian Centre" />
-        <InfoRow icon={<ClipboardList size={14} />} label="App Name" value="SICC Admin v3.0" />
+        <InfoRow icon={<ClipboardList size={14} />} label="App Name" value="SICC Admin" />
         <InfoRow icon={<MapPin size={14} />} label="KDF Areas" value={`${KDF_AREAS.length} areas loaded`} color={C.gold} />
         <InfoRow icon={<Building2 size={14} />} label="Departments" value={`${DEPARTMENTS.length} departments`} color={C.gold} />
         <InfoRow icon={<Phone size={14} />} label="SMS Provider" value="BulkSMSNigeria.com" />
-        <InfoRow icon={<CheckSquare size={14} />} label="Database" value="Supabase (Cloud — Real-time)" color={C.success} />
+        <InfoRow icon={<CheckSquare size={14} />} label="Backend" value="Hostinger Node.js + MySQL" color={C.success} />
       </Panel>
     </div>
   );

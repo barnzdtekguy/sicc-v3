@@ -39,7 +39,7 @@ function Overview({ setActiveTab }) {
         <img src="/salem-logo.png" alt="Salem" style={{ width: 52, height: 52, objectFit: 'contain' }} />
         <div>
           <div style={{ fontSize: 18, fontWeight: 500, color: '#fff' }}>Welcome, {profile?.name}</div>
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', marginTop: 3 }}>Salem International Christian Centre — Administrative Overview</div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', marginTop: 3 }}>Salem International Christian Centre: Administrative Overview</div>
         </div>
         {todayBirthdays.length > 0 && (
           <div style={{ marginLeft: 'auto', background: 'rgba(201,168,76,0.2)', border: '1px solid rgba(201,168,76,0.4)', borderRadius: 10, padding: '8px 14px', textAlign: 'center' }}>
@@ -58,7 +58,7 @@ function Overview({ setActiveTab }) {
         <StatCard label="New Converts" value={newConverts.length} icon={<Star size={18} />} color={C.blue} sub="Need follow-up" onClick={() => openPreview('members', 'New Converts', [
           { label: 'New Converts', value: newConverts.length },
           { label: 'Need Follow-Up', value: newConverts.length },
-          { label: 'Last Service', value: lastService?.service || '—' },
+          { label: 'Last Service', value: lastService?.service || 'N/A' },
         ], 'These are newly registered members needing pastoral follow-up support.')} />
         <StatCard label="Need follow-up" value={newConverts.length} icon={<Bell size={18} />} color={C.warning} onClick={() => openPreview('followups', 'Follow-Up Queue', [
           { label: 'Pending Follow-Ups', value: newConverts.length },
@@ -80,7 +80,7 @@ function Overview({ setActiveTab }) {
           { label: 'Leaders Assigned', value: profiles.filter(p => p.role === ROLES.DEPARTMENT_LEADER).length },
           { label: 'Members Counted', value: members.length },
         ], 'Inspect departmental leadership coverage and team sizing.')} />
-        <StatCard label="Last Attendance" value={lastService?.count ?? '—'} icon={<CheckSquare size={18} />} color={C.gold} sub={lastService?.service} />
+        <StatCard label="Last Attendance" value={lastService?.count ?? 'N/A'} icon={<CheckSquare size={18} />} color={C.gold} sub={lastService?.service} />
       </Grid>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
@@ -108,7 +108,7 @@ function Overview({ setActiveTab }) {
               { key: 'phone', label: 'Phone' },
               { key: 'kdf_area', label: 'KDF Area', render: v => <Badge label={v} color={C.purple} /> },
               { key: 'wish', label: '', render: (_, r) => (
-                <Btn size="sm" variant="ghost" color={C.gold} onClick={() => window.open(`https://wa.me/234${r.phone?.replace(/^0/, '')}?text=${encodeURIComponent(`Happy Birthday ${r.first_name}! The Lord bless and keep you. — Bishop Enobong Etteh, Salem Int'l Christian Centre`)}`, '_blank')}>
+                <Btn size="sm" variant="ghost" color={C.gold} onClick={() => window.open(`https://wa.me/234${r.phone?.replace(/^0/, '')}?text=${encodeURIComponent(`Happy Birthday, ${r.first_name}! The Lord bless and keep you. With best wishes from Bishop Enobong Etteh and the Salem International Christian Centre.`)}`, '_blank')}>
                   <Gift size={13} /> Send Wishes
                 </Btn>
               )},
@@ -154,7 +154,7 @@ function Growth() {
         <StatCard label="Active Members" value={members.filter(m => m.status === 'Active Member').length} icon={<CheckSquare size={18} />} color={C.success} />
         <StatCard label="Workers" value={members.filter(m => m.status === 'Worker').length} icon={<Briefcase size={18} />} color={C.gold} />
         <StatCard label="Services Recorded" value={attendance.length} icon={<Calendar size={18} />} color={C.purple} />
-        <StatCard label="Avg Attendance" value={attendance.length ? Math.round(attendance.reduce((a, b) => a + b.count, 0) / attendance.length) : '—'} icon={<Activity size={18} />} color={C.danger} />
+        <StatCard label="Avg Attendance" value={attendance.length ? Math.round(attendance.reduce((a, b) => a + b.count, 0) / attendance.length) : 'N/A'} icon={<Activity size={18} />} color={C.danger} />
       </Grid>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <Panel title="Attendance History">
@@ -258,9 +258,9 @@ function Members() {
             { key: 'name', label: 'Name', render: (_, r) => <strong style={{ color: C.textPrimary }}>{r.first_name} {r.last_name}</strong> },
             { key: 'phone', label: 'Phone' },
             { key: 'kdf_area', label: 'KDF Area', render: v => <Badge label={v} color={C.purple} /> },
-            { key: 'department', label: 'Department', render: v => v || '—' },
+            { key: 'department', label: 'Department', render: v => v || 'N/A' },
             { key: 'status', label: 'Status', render: v => <StatusBadge status={v} /> },
-            { key: 'date_of_birth', label: 'DOB', render: v => v || '—' },
+            { key: 'date_of_birth', label: 'DOB', render: v => v || 'N/A' },
             { key: 'registered_by_name', label: 'Registered By' },
           ]}
           rows={filtered} emptyText="No members registered yet."
@@ -374,7 +374,7 @@ function FollowUps() {
             { key: 'member_name', label: 'Member', render: v => <strong style={{ color: C.textPrimary }}>{v}</strong> },
             { key: 'pastor_name', label: 'Pastor' },
             { key: 'date', label: 'Date' },
-            { key: 'method', label: 'Method', render: v => v ? <Badge label={v} color={C.blue} /> : '—' },
+            { key: 'method', label: 'Method', render: v => v ? <Badge label={v} color={C.blue} /> : 'N/A' },
             { key: 'notes', label: 'Notes', render: v => <span style={{ color: C.textSecondary, fontSize: 12, maxWidth: 200, display: 'inline-block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v}</span> },
             { key: 'status', label: 'Status', render: v => <StatusBadge status={v} /> },
             { key: 'view', label: '', render: (_, r) => <Btn size="sm" variant="ghost" color={C.gold} onClick={() => setSelected(r)}>View</Btn> },
@@ -415,10 +415,10 @@ function Communication() {
   };
 
   const quickMsgs = [
-    { icon: <Bell size={14} />, label: 'Sunday Service Reminder', text: "Dear Salem Family, Sunday Service holds today. Come and be blessed! — Bishop Enobong Etteh, Salem Int'l Christian Centre." },
-    { icon: <Clock size={14} />, label: 'Mid-Week Service', text: "Dear Salem Family, Mid-Week Service holds this Wednesday. Come and be refreshed. — SICC." },
-    { icon: <Heart size={14} />, label: 'Prayer Broadcast', text: "Let us pray: The Lord is our strength and shield. Trust in Him always. — Bishop Enobong Etteh, SICC." },
-    { icon: <Star size={14} />, label: 'Special Programme', text: "Dear Salem Family, we have a Special Programme coming soon. Stay connected. — SICC." },
+    { icon: <Bell size={14} />, label: 'Sunday Service Reminder', text: "Dear Salem family, our Sunday service takes place today. We look forward to worshipping with you. Regards, Bishop Enobong Etteh, Salem International Christian Centre." },
+    { icon: <Clock size={14} />, label: 'Mid-Week Service', text: "Dear Salem family, please join us for our mid-week service this Wednesday. We look forward to seeing you. Regards, SICC." },
+    { icon: <Heart size={14} />, label: 'Prayer Broadcast', text: "Let us pray: The Lord is our strength and shield. May we continue to trust in Him. Regards, Bishop Enobong Etteh, SICC." },
+    { icon: <Star size={14} />, label: 'Special Programme', text: "Dear Salem family, please join us for our upcoming special programme. Further details will be shared soon. Regards, SICC." },
   ];
 
   return (
@@ -429,7 +429,7 @@ function Communication() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div style={{ fontSize: 13, color: C.textSecondary }}>
               Recipients: <strong style={{ color: C.navy }}>{members.length} members</strong>
-              {!smsConfig.api_key && <span style={{ color: C.danger, marginLeft: 8, fontSize: 12 }}>— API key not set</span>}
+              {!smsConfig.api_key && <span style={{ color: C.danger, marginLeft: 8, fontSize: 12 }}>API key not set</span>}
             </div>
             <Textarea value={msg} onChange={setMsg} placeholder="Type your broadcast message..." rows={5} />
             <div style={{ display: 'flex', gap: 8 }}>
@@ -516,7 +516,7 @@ function Assignments() {
             { key: 'task', label: 'Task' },
             { key: 'assignee', label: 'Assigned To' },
             { key: 'priority', label: 'Priority', render: v => <Badge label={v} color={v === 'Urgent' ? C.danger : v === 'High Priority' ? C.gold : C.blue} /> },
-            { key: 'due_date', label: 'Due Date', render: v => v || '—' },
+            { key: 'due_date', label: 'Due Date', render: v => v || 'N/A' },
             { key: 'status', label: 'Status', render: v => <StatusBadge status={v} /> },
             { key: 'actions', label: '', render: (_, r) => (<div style={{ display: 'flex', gap: 6 }}>{r.status !== 'Completed' && <Btn size="sm" variant="ghost" color={C.success} onClick={() => complete(r.id)}><CheckSquare size={12} /></Btn>}<Btn size="sm" variant="ghost" color={C.danger} onClick={() => remove(r.id)}>Remove</Btn></div>) },
           ]}

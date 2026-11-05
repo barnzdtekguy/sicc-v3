@@ -22,7 +22,7 @@ export function StatCard({ label, value, sub, icon, color = C.blue, onClick }) {
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: 4 }}>
         <div style={{ minWidth: 0 }}>
           <div style={{ fontSize: 11, color: C.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 500, marginBottom: 6 }}>{label}</div>
-          <div style={{ fontSize: 28, fontWeight: 500, color: C.textPrimary, lineHeight: 1 }}>{value ?? '—'}</div>
+          <div style={{ fontSize: 28, fontWeight: 500, color: C.textPrimary, lineHeight: 1 }}>{value ?? 'N/A'}</div>
           {sub && <div style={{ fontSize: 11, color, marginTop: 4, fontWeight: 500 }}>{sub}</div>}
         </div>
         <div style={{ width: 40, height: 40, borderRadius: 10, background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color }}>{icon}</div>
@@ -106,7 +106,7 @@ export function Select({ label, value, onChange, options, required, hint }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       {label && <label style={{ fontSize: 12, fontWeight: 500, color: C.textSecondary }}>{label}{required && <span style={{ color: C.danger, marginLeft: 2 }}>*</span>}</label>}
       <select value={value} onChange={e => onChange(e.target.value)} required={required} style={{ padding: '10px 12px', background: C.inputBg, border: `1px solid ${C.border}`, borderRadius: 8, color: value ? C.textPrimary : C.textMuted, fontSize: 13, outline: 'none', fontFamily: 'inherit' }}>
-        <option value="">— Select —</option>
+        <option value="">Select an option</option>
         {options.map(o => <option key={o.value ?? o} value={o.value ?? o}>{o.label ?? o}</option>)}
       </select>
       {hint && <span style={{ fontSize: 11, color: C.textMuted }}>{hint}</span>}
@@ -156,7 +156,7 @@ export function DataTable({ columns, rows, emptyText = 'No records found', onRow
               <tr key={i} onClick={() => onRowClick && onRowClick(row)} style={{ borderBottom: `0.5px solid ${C.border}`, cursor: onRowClick ? 'pointer' : 'default' }}
                 onMouseEnter={e => e.currentTarget.style.background = C.pageBg}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                {columns.map(c => <td key={c.key} style={{ padding: '11px 12px', color: C.textPrimary, verticalAlign: 'middle' }}>{c.render ? c.render(row[c.key], row) : (row[c.key] ?? '—')}</td>)}
+                {columns.map(c => <td key={c.key} style={{ padding: '11px 12px', color: C.textPrimary, verticalAlign: 'middle' }}>{c.render ? c.render(row[c.key], row) : (row[c.key] ?? 'N/A')}</td>)}
               </tr>
             ))}
         </tbody>
@@ -175,7 +175,7 @@ export function InfoRow({ icon, label, value, color }) {
       <span style={{ color: C.textMuted, marginTop: 1, flexShrink: 0, display: 'flex', alignItems: 'center' }}>{icon}</span>
       <div style={{ flex: 1 }}>
         <div style={{ fontSize: 11, color: C.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>{label}</div>
-        <div style={{ fontSize: 13, color: color || C.textPrimary, fontWeight: 500 }}>{value || '—'}</div>
+        <div style={{ fontSize: 13, color: color || C.textPrimary, fontWeight: 500 }}>{value || 'N/A'}</div>
       </div>
     </div>
   );
@@ -189,7 +189,7 @@ export function ActivityFeed({ items, limit = 10 }) {
         <div key={i} style={{ display: 'flex', gap: 10, padding: '9px 0', borderBottom: `0.5px solid ${C.border}` }}>
           <div style={{ width: 7, height: 7, borderRadius: '50%', background: C.gold, marginTop: 5, flexShrink: 0 }} />
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 13, color: C.textPrimary }}><strong style={{ fontWeight: 500 }}>{item.user_name}</strong><span style={{ color: C.textSecondary }}> — {item.action}</span></div>
+            <div style={{ fontSize: 13, color: C.textPrimary }}><strong style={{ fontWeight: 500 }}>{item.user_name}</strong><span style={{ color: C.textSecondary }}>: {item.action}</span></div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
               <span style={{ fontSize: 12, color: C.textMuted }}>{item.detail}</span>
               <span style={{ fontSize: 11, color: C.textMuted, marginLeft: 12 }}>{new Date(item.created_at).toLocaleString('en-NG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>

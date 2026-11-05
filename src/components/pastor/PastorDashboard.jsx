@@ -122,7 +122,7 @@ function RegisterMember() {
             <input
               value={form.address}
               onChange={e => f('address')(e.target.value)}
-              placeholder="Street / Estate / Area — used for auto KDF assignment"
+              placeholder="Street, estate, or area for KDF assignment"
               style={{ padding: '10px 12px', background: C.inputBg, border: `1px solid ${C.border}`, borderRadius: 8, color: C.textPrimary, fontSize: 13, outline: 'none', fontFamily: 'inherit' }}
             />
           </div>
@@ -187,10 +187,10 @@ function MyMembers() {
             { key: 'phone', label: 'Phone' },
             { key: 'address', label: 'Address' },
             { key: 'kdf_area', label: 'KDF Area', render: v => <Badge label={v} color={C.purple} /> },
-            { key: 'department', label: 'Dept', render: v => v || '—' },
-            { key: 'affinity_group', label: 'Affinity', render: v => v ? <Badge label={v} color={C.blue} /> : '—' },
+            { key: 'department', label: 'Dept', render: v => v || 'N/A' },
+            { key: 'affinity_group', label: 'Affinity', render: v => v ? <Badge label={v} color={C.blue} /> : 'N/A' },
             { key: 'status', label: 'Status', render: v => <StatusBadge status={v} /> },
-            { key: 'date_of_birth', label: 'DOB', render: v => v || '—' },
+            { key: 'date_of_birth', label: 'DOB', render: v => v || 'N/A' },
             { key: 'spiritual_status', label: 'Spiritual' },
           ]}
           rows={filtered}
@@ -254,7 +254,7 @@ function FollowUp() {
             { key: 'date', label: 'Date' },
             { key: 'method', label: 'Method', render: v => <Badge label={v} color={C.blue} /> },
             { key: 'notes', label: 'Notes', render: v => <span style={{ color: C.textSecondary, fontSize: 12, maxWidth: 200, display: 'inline-block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v}</span> },
-            { key: 'outcome', label: 'Outcome', render: v => v || '—' },
+            { key: 'outcome', label: 'Outcome', render: v => v || 'N/A' },
             { key: 'status', label: 'Status', render: v => <StatusBadge status={v} /> },
           ]}
           rows={followUps}
@@ -299,7 +299,7 @@ function Reports() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div style={{ background: `${C.success}0D`, border: `1px solid ${C.success}25`, borderRadius: 12, padding: '16px 20px' }}>
-        <div style={{ fontSize: 13, fontWeight: 500, color: C.success, marginBottom: 10 }}>My Activity — Visible to Bishop and Admin</div>
+        <div style={{ fontSize: 13, fontWeight: 500, color: C.success, marginBottom: 10 }}>My activity (visible to Bishop and Admin)</div>
         <Grid cols="repeat(4, 1fr)" gap={12}>
           {[
             { v: members.length, l: 'Registered' },

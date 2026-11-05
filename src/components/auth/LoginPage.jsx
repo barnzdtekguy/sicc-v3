@@ -68,7 +68,7 @@ export default function LoginPage({ onBack }) {
     setError('');
     setLoading(true);
     try {
-      const result = await login(identifier.trim(), password, identifierType);
+      const result = await login(identifier.trim(), password, identifierType, rememberMe);
       if (!result.success) {
         setError(getLoginError(result.error));
       }
