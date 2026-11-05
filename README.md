@@ -7,7 +7,7 @@ Internal administrative portal for Salem International Christian Centre. The fro
 1. Install Node.js 20 or newer and MySQL.
 2. Create a database and import [`server/schema.sql`](./server/schema.sql).
 3. Copy `.env.example` to `.env` and set your database credentials, a random `JWT_SECRET` of at least 32 characters, and the initial admin name, email, and password. The initial password must be at least 12 characters.
-4. Run `npm install`, `npm run build`, and `npm start`.
+4. Run `npm install --include=dev`, `npm run build`, and `npm start`.
 
 The first server start creates the initial administrator only when the profiles table is empty. Set the initial admin environment variables before that first start.
 

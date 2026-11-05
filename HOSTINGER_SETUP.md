@@ -29,7 +29,19 @@ Set these variables in the website's Node.js settings:
 
 Use the Hostinger-provided database credentials; do not put secrets in `REACT_APP_*` variables or commit a `.env` file. The initial admin is created only when the profiles table is empty. After the first successful startup, remove `INITIAL_ADMIN_PASSWORD` from the hosting environment.
 
-Deploy the project root as a Node.js app. Hostinger should run `npm run build` and `npm start`; the server serves the built React app and `/api` from the same origin. Do not deploy only the `build` folder, since that omits the API.
+## Deployment commands
+
+Configure the Hostinger Node.js application to use the project root: the directory containing `package.json`, `package-lock.json`, `server/`, `src/`, `index.html`, and `vite.config.js`. Do not select the parent directory or the generated `build/` directory.
+
+Set the deployment commands to:
+
+| Setting | Command |
+| --- | --- |
+| Install command | `npm install --include=dev` |
+| Build command | `npm run build` |
+| Start command | `node server/index.js` |
+
+The install command must include development dependencies because Vite and its React plugin are needed during the production build. The server serves the built React app and `/api` from the same origin. Do not deploy only the `build` folder, since that omits the API.
 
 ## Initial sign-in
 
