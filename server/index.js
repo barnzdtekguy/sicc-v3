@@ -14,6 +14,20 @@ const app = express();
 const ROLES = ['bishop', 'admin', 'pastor', 'department_leader', 'kdf_coordinator'];
 const STAFF_ROLES = ['bishop', 'admin', 'pastor'];
 const PRIVILEGED_ROLES = ['bishop', 'admin'];
+const DEPARTMENT_RENAMES = {
+  'Missions Prayer': 'Missions',
+  'KDF Training': 'KDF',
+  'Assimilation & Covenant Friends': 'Assimilation / Covenant Friends',
+  'Wealth Creation & Cooperative': 'Wealth Creation / Cooperative',
+  'Facility Management & Projects': 'Facility Management / Projects',
+  'Education & Scholarship': 'Education / Scholarship',
+  'Bookshop & Reading Culture': 'Bookshop / Reading Culture',
+  'Healing & Deliverance': 'Healing & Deliverance Crack Team',
+  'Crack Team': 'Healing & Deliverance Crack Team',
+  'Counselling & Call Centre': 'Counselling / Call Centre',
+  'Marriage & Couples': 'Marriage / Couples',
+  'Publicity & Branding': 'Publicity / Branding',
+};
 
 app.set('trust proxy', 1);
 app.use(helmet({ contentSecurityPolicy: false }));
@@ -136,6 +150,20 @@ async function createRow(table, values) {
   );
   const rows = await query(`SELECT * FROM ${table} WHERE id = ? LIMIT 1`, [record.id]);
   return rows[0];
+}
+
+async function migrateDepartmentNames() {
+  const entries = Object.entries(DEPARTMENT_RENAMES);
+  const cases = entries.map(() => 'WHEN ? THEN ?').join(' ');
+  const names = entries.map(() => '?').join(', ');
+  const values = entries.flatMap(([oldName, newName]) => [oldName, newName]);
+  for (const table of ['members', 'profiles']) {
+    await query(
+      `UPDATE ${table} SET department = CASE department ${cases} ELSE department END
+       WHERE department IN (${names})`,
+      [...values, ...entries.map(([oldName]) => oldName)],
+    );
+  }
 }
 
 async function saveProgrammeRecord(connection, input, { insertOnly = false } = {}) {
@@ -611,6 +639,7 @@ async function bootstrapInitialAdmin() {
 async function start() {
   getJwtSecret();
   await query('SELECT 1');
+  await migrateDepartmentNames();
   await bootstrapInitialAdmin();
   const port = Number(process.env.PORT || 3001);
   const server = app.listen(port, () => console.info(`SICC Admin listening on port ${port}.`));

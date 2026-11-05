@@ -65,14 +65,7 @@ function FadeIn({ children, delay = 0, style = {} }) {
 /* ════════════════════════════════════════════════════════ */
 export default function LandingPage({ onEnter }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
 
   const scrollTo = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -89,7 +82,7 @@ export default function LandingPage({ onEnter }) {
       fontFamily: "'Plus Jakarta Sans', 'Segoe UI', sans-serif",
       background: C.offWhite,
       color: C.text,
-      overflowX: 'hidden',
+      overflowX: 'clip',
       opacity: isLeaving ? 0 : 1,
       transform: isLeaving ? 'translateY(-14px)' : 'translateY(0)',
       transition: 'opacity 0.24s ease, transform 0.24s ease',
@@ -99,6 +92,7 @@ export default function LandingPage({ onEnter }) {
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
+        section[id] { scroll-margin-top: 76px; }
         .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
         .gold-em { color: ${C.gold}; font-style: italic; }
         @keyframes floatA { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-10px)} }
@@ -248,11 +242,10 @@ export default function LandingPage({ onEnter }) {
 
       {/* ── NAV ── */}
       <nav style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200,
-        background: scrolled ? 'rgba(12,27,58,.97)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(12px)' : 'none',
-        borderBottom: scrolled ? '1px solid rgba(255,255,255,.08)' : 'none',
-        transition: 'background .3s, backdrop-filter .3s',
+        position: 'sticky', top: 0, zIndex: 200,
+        background: 'rgba(12,27,58,.97)',
+        backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid rgba(255,255,255,.08)',
         padding: '0 clamp(1.25rem, 5vw, 3rem)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64,
       }}>

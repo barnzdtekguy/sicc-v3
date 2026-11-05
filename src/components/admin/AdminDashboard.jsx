@@ -290,7 +290,17 @@ function DeptMgmt() {
         return (
           <Panel key={d.id} style={{ borderTop: `3px solid ${d.color}` }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}><Building2 size={16} color={d.color} /><div style={{ fontSize: 14, fontWeight: 500, color: C.textPrimary }}>{d.name}</div></div>
-            <div style={{ fontSize: 12, color: C.textSecondary, marginBottom: 10 }}>Leader: <strong style={{ color: leader ? C.navy : C.danger }}>{leader?.name || 'Not Assigned'}</strong></div>
+            <div style={{ fontSize: 12, color: C.textSecondary, marginBottom: 8, lineHeight: 1.6 }}>
+              HODs: <strong style={{ color: C.navy }}>{d.heads.length ? d.heads.join(', ') : 'Not listed'}</strong>
+            </div>
+            {d.teams?.map(team => (
+              <div key={team.name} style={{ fontSize: 11, color: C.textSecondary, marginBottom: 6, lineHeight: 1.5 }}>
+                <strong style={{ color: C.navy }}>{team.name}:</strong> {team.heads.join(', ')}
+              </div>
+            ))}
+            <div style={{ fontSize: 11, color: C.textMuted, marginBottom: 10 }}>
+              Portal account: <strong style={{ color: leader ? C.navy : C.textMuted }}>{leader?.name || 'Not assigned'}</strong>
+            </div>
             <Badge label={`${count} members`} color={d.color} />
           </Panel>
         );
